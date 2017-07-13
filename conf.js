@@ -28,8 +28,8 @@ conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 // build cse
 cse.host        = '203.253.128.161';
 cse.port        = '7579';
-cse.name        = 'mobius-yt';
-cse.id          = '/mobius-yt';
+cse.name        = 'Mobius';
+cse.id          = '/Mobius';
 cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
