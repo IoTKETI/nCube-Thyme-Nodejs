@@ -1,0 +1,31 @@
+{
+  "name": "thyme",
+  "version": "1.7.2",
+  "dependencies": {
+    "body-parser": "^1.17.0",
+    "cbor": "^3.0.0",
+    "coap": "^0.21.0",
+    "express": "^4.15.1",
+    "fs": "0.0.2",
+    "http": "0.0.0",
+    "ip": "^1.1.5",
+    "js2xmlparser": "^3.0.0",
+    "morgan": "^1.8.1",
+    "mqtt": "^2.9.1",
+    "shortid": "^2.2.6",
+    "twitter": "^1.7.0",
+    "url": "^0.11.0",
+    "util": "^0.10.3",
+    "websocket": "^1.0.24",
+    "xml2js": "^0.4.17",
+    "xmlbuilder": "^9.0.1"
+  },
+  "description": "&Cube:Thyme",
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Il Yeup Ahn, KETI",
+  "license": "ISC"
+}
