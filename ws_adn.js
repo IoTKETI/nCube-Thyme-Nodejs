@@ -54,7 +54,7 @@ exports.crtae = function (callback) {
         req_message['m2m:rqp'].pc['m2m:ae']['@'] = {"rn": conf.ae.name};
         delete req_message['m2m:rqp'].pc['m2m:ae'].rn;
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log('websocket (xml)' + rqi + '---->');
@@ -93,7 +93,7 @@ exports.rtvae = function (callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log('websocket (xml) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
@@ -150,7 +150,7 @@ exports.crtct = function(count, callback) {
         req_message['m2m:rqp'].pc['m2m:cnt']['@'] = {"rn": conf.cnt[count].name};
         delete req_message['m2m:rqp'].pc['m2m:cnt'].rn;
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log('websocket (xml) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
@@ -190,7 +190,7 @@ exports.rtvct = function(count, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log(req_topic + ' (' + rqi + ' - xml) ---->');
@@ -240,7 +240,7 @@ exports.delsub = function(count, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log('websocket (xml) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
@@ -291,7 +291,7 @@ exports.crtsub = function(count, callback) {
         req_message['m2m:rqp'].pc['m2m:sub']['@'] = {"rn": conf.sub[count].name};
         delete req_message['m2m:rqp'].pc['m2m:sub'].rn;
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log('websocket (xml) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
@@ -334,7 +334,7 @@ exports.crtci = function(count, content, socket, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         ws_connection.sendUTF(bodyString);
         console.log('websocket (xml) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');

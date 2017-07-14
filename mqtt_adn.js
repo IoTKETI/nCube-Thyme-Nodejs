@@ -54,7 +54,7 @@ exports.crtae = function (callback) {
         req_message['m2m:rqp'].pc['m2m:ae']['@'] = {"rn": conf.ae.name};
         delete req_message['m2m:rqp'].pc['m2m:ae'].rn;
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -94,7 +94,7 @@ exports.rtvae = function (callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -152,7 +152,7 @@ exports.crtct = function(count, callback) {
         req_message['m2m:rqp'].pc['m2m:cnt']['@'] = {"rn": conf.cnt[count].name};
         delete req_message['m2m:rqp'].pc['m2m:cnt'].rn;
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -193,7 +193,7 @@ exports.rtvct = function(count, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -244,7 +244,7 @@ exports.delsub = function(count, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -296,7 +296,7 @@ exports.crtsub = function(count, callback) {
         req_message['m2m:rqp'].pc['m2m:sub']['@'] = {"rn": conf.sub[count].name};
         delete req_message['m2m:rqp'].pc['m2m:sub'].rn;
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -340,7 +340,7 @@ exports.crtci = function(count, content, socket, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var bodyString = js2xmlparser("m2m:rqp", req_message['m2m:rqp']);
+        var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
 
         mqtt_client.publish(req_topic, bodyString);
 

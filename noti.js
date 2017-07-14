@@ -83,7 +83,7 @@ exports.response_mqtt = function (rsp_topic, rsc, to, fr, rqi, inpc, bodytype) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var xmlString = js2xmlparser("m2m:rsp", rsp_message['m2m:rsp']);
+        var xmlString = js2xmlparser.parse("m2m:rsp", rsp_message['m2m:rsp']);
 
         mqtt_client.publish(rsp_topic, xmlString);
     }
@@ -112,7 +112,7 @@ exports.response_ws = function (connection, rsc, to, fr, rqi, inpc, bodytype) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        var xmlString = js2xmlparser("m2m:rsp", rsp_message['m2m:rsp']);
+        var xmlString = js2xmlparser.parse("m2m:rsp", rsp_message['m2m:rsp']);
 
         connection.sendUTF(xmlString.toString());
     }

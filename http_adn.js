@@ -120,7 +120,7 @@ exports.crtae = function (callback) {
             "rn" : conf.ae.name
         };
 
-        bodyString = js2xmlparser("m2m:ae", results_ae);
+        bodyString = js2xmlparser.parse("m2m:ae", results_ae);
 
         console.log(bodyString);
     }
@@ -163,7 +163,7 @@ exports.udtae = function (callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        bodyString = js2xmlparser("m2m:ae", results_ae);
+        bodyString = js2xmlparser.parse("m2m:ae", results_ae);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ae['m2m:ae'] = {};
@@ -202,7 +202,7 @@ exports.crtct = function(count, callback) {
             "rn": conf.cnt[count].name
         };
 
-        bodyString = js2xmlparser("m2m:cnt", results_ct);
+        bodyString = js2xmlparser.parse("m2m:cnt", results_ct);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ct['m2m:cnt'] = {};
@@ -243,7 +243,7 @@ exports.udtct = function(count, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        bodyString = js2xmlparser("m2m:cnt", results_ct);
+        bodyString = js2xmlparser.parse("m2m:cnt", results_ct);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ct['m2m:cnt'] = {};
@@ -292,7 +292,7 @@ exports.crtsub = function(count, callback) {
             "rn": conf.sub[count].name
         };
 
-        bodyString = js2xmlparser("m2m:sub", results_ss);
+        bodyString = js2xmlparser.parse("m2m:sub", results_ss);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ss['m2m:sub'] = {};
@@ -332,7 +332,7 @@ exports.crtci = function(count, content, socket, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        bodyString = js2xmlparser("m2m:cin", results_ci);
+        bodyString = js2xmlparser.parse("m2m:cin", results_ci);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ci['m2m:cin'] = {};
