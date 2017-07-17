@@ -24,7 +24,7 @@ var shortid = require('shortid');
 
 global.sh_adn = require('./coap_adn');
 var noti = require('./noti');
-var tas = require('./tas');
+var tas = require('./thyme_tas');
 
 var COAP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;

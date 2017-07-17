@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<m2m:conf xmlns:m2m="http://www.onem2m.org/xml/protocols" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <tas>
+        <comport>/dev/ttyUSB0</comport>
+        <baudrate>9600</baudrate>
+        <parenthostname>localhost</parenthostname>
+        <parentport>3105</parentport>
+    </tas>
+    <upload>
+        <ctname>cnt-co2</ctname>
+        <id>fe80:0000:0000:0000:0212:4b00:0235:bce5</id>
+    </upload>
+    <upload>
+        <ctname>cnt-timer</ctname>
+        <id>timer</id>
+    </upload>
+</m2m:conf>

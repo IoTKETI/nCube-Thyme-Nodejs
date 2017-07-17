@@ -26,7 +26,7 @@ var cbor = require('cbor');
 
 global.sh_adn = require('./http_adn');
 var noti = require('./noti');
-var tas = require('./tas');
+var tas = require('./thyme_tas');
 
 var HTTP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;

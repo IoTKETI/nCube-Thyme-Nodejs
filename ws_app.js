@@ -54,7 +54,7 @@ else {
 
 global.sh_adn = require('./ws_adn');
 var noti = require('./noti');
-var tas = require('./tas');
+var tas = require('./thyme_tas');
 
 function ws_callback(jsonObj) {
     for (var i = 0; i < resp_mqtt_ri_arr.length; i++) {

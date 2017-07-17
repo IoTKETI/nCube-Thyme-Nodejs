@@ -32,7 +32,7 @@ var noti_topic = '/oneM2M/req/'+cseid+'/'+conf.ae.id+'/#';
 
 global.sh_adn = require('./mqtt_adn');
 var noti = require('./noti');
-var tas = require('./tas');
+var tas = require('./thyme_tas');
 
 global.req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
 

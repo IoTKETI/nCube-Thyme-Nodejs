@@ -12,7 +12,7 @@
  * Created by Il Yeup, Ahn in KETI on 2016-09-21.
  */
 
-var tas = require('./tas');
+var tas = require('./thyme_tas');
 var js2xmlparser = require('js2xmlparser');
 
 var _this = this;
