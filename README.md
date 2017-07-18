@@ -105,4 +105,4 @@ This is the list of library dependencies for &Cube-Lavender
 If you want more details please dowload the full [installation guide document](https://github.com/IoTKETI/nCube-Thyme-Nodejs/blob/master/doc/User_Guide_Thyme_Nodejs_v2.0.0_KR.docx).
 
 # Author
-Il Yeup (iyahn@keti.re.kr; ryeubi@gmail.com)
+Il Yeup Ahn (iyahn@keti.re.kr; ryeubi@gmail.com)
