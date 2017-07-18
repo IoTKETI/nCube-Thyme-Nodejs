@@ -16,7 +16,7 @@
 
 - [Node.js](https://nodejs.org/en/)<br/>
 Node.js® is a JavaScript runtime built on Chrome's V8 JavaScript engine. Node.js uses an event-driven, non-blocking I/O model that makes it lightweight and efficient. Node.js' package ecosystem, npm, is the largest ecosystem of open source libraries in the world. Node.js is very powerful in service impelementation because it provide a rich and free web service API. So, we use it to make RESTful API base on the oneM2M standard.
-- [&Cube-Thyme for Node.js](https://github.com/IoTKETI/nCube-Lavender/archive/master.zip)<br/>
+- [&Cube-Thyme for Node.js](https://github.com/IoTKETI/nCube-Thyme-Nodejs/archive/master.zip)<br/>
 &Cube-Thyme for Node.js source codes are written in javascript. So they don't need any compilation or installation before running.
 
 ## Configuration
