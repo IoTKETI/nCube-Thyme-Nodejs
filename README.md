@@ -82,7 +82,7 @@ node thyme.js
 </div><br/>
 
 ## Dependency Libraries
-This is the list of library dependencies for &Cube-Lavender 
+This is the list of library dependencies for &Cube:Thyme Node.js 
 - body-parser
 - cbor
 - coap
