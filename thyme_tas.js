@@ -30,7 +30,8 @@ function timer_upload_action() {
             if (conf.cnt[j].name == 'cnt-timer') {
                 var content = JSON.stringify({value: 'TAS' + t_count++});
                 console.log('thyme cnt-timer ' + content + ' ---->');
-                sh_adn.crtci(j, content, this, function (status, res_body, to, socket) {
+                var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
+                sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
                     console.log('x-m2m-rsc : ' + status + ' <----');
                 });
                 break;
@@ -91,7 +92,8 @@ function tas_handler (data) {
                     for (var j = 0; j < conf.cnt.length; j++) {
                         if (conf.cnt[j].name == ctname) {
                             //console.log(line);
-                            sh_adn.crtci(j, content, this, function (status, res_body, to, socket) {
+                            var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
+                            sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
                                 try {
                                     var to_arr = to.split('/');
                                     var ctname = to_arr[to_arr.length - 1];

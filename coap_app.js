@@ -360,7 +360,9 @@ function coap_message_handler(request, response) {
 }
 
 function mqtt_connect(serverip, noti_topic) {
-    mqtt_client = mqtt.connect('mqtt://' + serverip + ':' + conf.cse.mqttport);
+    if(mqtt_client == null) {
+        mqtt_client = mqtt.connect('mqtt://' + serverip + ':' + conf.cse.mqttport);
+    }
 
     mqtt_client.on('connect', function () {
         mqtt_client.subscribe(noti_topic);

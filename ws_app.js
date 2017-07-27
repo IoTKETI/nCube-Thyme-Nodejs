@@ -450,8 +450,9 @@ function ready_for_notification() {
 }
 
 function mqtt_connect(serverip, noti_topic) {
-    mqtt_client = mqtt.connect('mqtt://' + serverip + ':' + conf.cse.mqttport);
-
+    if(mqtt_client == null) {
+        mqtt_client = mqtt.connect('mqtt://' + serverip + ':' + conf.cse.mqttport);
+    }
     mqtt_client.on('connect', function () {
         mqtt_client.subscribe(noti_topic);
         console.log('[mqtt_connect] noti_topic : ' + noti_topic);

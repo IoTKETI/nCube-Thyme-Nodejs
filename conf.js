@@ -41,7 +41,7 @@ else {
     ae.id = 'S';
 }
 ae.parent       = '/' + cse.name;
-ae.name         = 'ae-edu2';
+ae.name         = 'ae-edu3';
 ae.appid        = 'measure_co2';
 ae.port         = '9727';
 ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'

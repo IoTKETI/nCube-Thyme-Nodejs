@@ -106,13 +106,13 @@ function http_request(path, method, ty, bodyString, callback) {
     req.end();
 }
 
-exports.crtae = function (callback) {
+exports.crtae = function (parent, rn, api, callback) {
     var results_ae = {};
 
     var bodyString = '';
 
     if(conf.ae.bodytype === 'xml') {
-        results_ae.api = conf.ae.appid;
+        results_ae.api = api;
         results_ae.rr = true;
         results_ae['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
@@ -126,34 +126,34 @@ exports.crtae = function (callback) {
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ae['m2m:ae'] = {};
-        results_ae['m2m:ae'].api = conf.ae.appid;
-        results_ae['m2m:ae'].rn = conf.ae.name;
+        results_ae['m2m:ae'].api = api;
+        results_ae['m2m:ae'].rn = rn;
         results_ae['m2m:ae'].rr = true;
         bodyString = cbor.encode(results_ae).toString('hex');
         console.log(bodyString);
     }
     else {
         results_ae['m2m:ae'] = {};
-        results_ae['m2m:ae'].api = conf.ae.appid;
-        results_ae['m2m:ae'].rn = conf.ae.name;
+        results_ae['m2m:ae'].api = api;
+        results_ae['m2m:ae'].rn = rn;
         results_ae['m2m:ae'].rr = true;
         //results_ae['m2m:ae'].acpi = '/mobius-yt/acp1';
         bodyString = JSON.stringify(results_ae);
     }
 
-    http_request(conf.ae.parent, 'post', '2', bodyString, function (res, res_body) {
+    http_request(parent, 'post', '2', bodyString, function (res, res_body) {
         callback(res.headers['x-m2m-rsc'], res_body);
     });
 };
 
-exports.rtvae = function (callback) {
-    http_request(conf.ae.parent + '/' + conf.ae.name, 'get', '', '', function (res, res_body) {
+exports.rtvae = function (target, callback) {
+    http_request(target, 'get', '', '', function (res, res_body) {
         callback(res.headers['x-m2m-rsc'], res_body);
     });
 };
 
 
-exports.udtae = function (callback) {
+exports.udtae = function (target, callback) {
     var bodyString = '';
     var results_ae = {};
     if(conf.ae.bodytype === 'xml') {
@@ -177,67 +177,69 @@ exports.udtae = function (callback) {
         bodyString = JSON.stringify(results_ae);
     }
 
-    http_request(conf.ae.parent + '/' + conf.ae.name, 'put', '', bodyString, function (res, res_body) {
+    http_request(target, 'put', '', bodyString, function (res, res_body) {
         callback(res.headers['x-m2m-rsc'], res_body);
     });
 };
 
 
-exports.delae = function (callback) {
-    http_request(conf.ae.parent + '/' + conf.ae.name, 'delete', '', '', function (res, res_body) {
+exports.delae = function (target, callback) {
+    http_request(target, 'delete', '', '', function (res, res_body) {
         callback(res.headers['x-m2m-rsc'], res_body);
     });
 };
 
-exports.crtct = function(count, callback) {
+exports.crtct = function(parent, rn, count, callback) {
     var results_ct = {};
 
     //console.log(count + ' - ' + conf.cnt[count].name);
     var bodyString = '';
     if (conf.ae.bodytype === 'xml') {
-        results_ct.lbl = conf.cnt[count].name;
+        results_ct.lbl = rn;
         results_ct['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "rn": conf.cnt[count].name
+            "rn": rn
         };
 
         bodyString = js2xmlparser.parse("m2m:cnt", results_ct);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ct['m2m:cnt'] = {};
-        results_ct['m2m:cnt'].rn = conf.cnt[count].name;
-        results_ct['m2m:cnt'].lbl = [conf.cnt[count].name];
+        results_ct['m2m:cnt'].rn = rn;
+        results_ct['m2m:cnt'].lbl = [rn];
         bodyString = cbor.encode(results_ct).toString('hex');
         console.log(bodyString);
     }
     else {
         results_ct['m2m:cnt'] = {};
-        results_ct['m2m:cnt'].rn = conf.cnt[count].name;
-        results_ct['m2m:cnt'].lbl = [conf.cnt[count].name];
+        results_ct['m2m:cnt'].rn = rn;
+        results_ct['m2m:cnt'].lbl = [rn];
         bodyString = JSON.stringify(results_ct);
     }
 
-    http_request(conf.cnt[count].parent, 'post', '3', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + conf.cnt[count].name + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request(parent, 'post', '3', bodyString, function (res, res_body) {
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+        console.log(res_body);
         callback(res.headers['x-m2m-rsc'], res_body, count);
     });
 };
 
 
-exports.rtvct = function(count, callback) {
-    http_request(conf.cnt[count].parent + '/' + conf.cnt[count].name, 'get', '', '', function (res, res_body) {
-        console.log(count + ' - ' + conf.cnt[count].name + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+exports.rtvct = function(target, count, callback) {
+    http_request(target, 'get', '', '', function (res, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+        console.log(res_body);
         callback(res.headers['x-m2m-rsc'], res_body, count);
     });
 };
 
 
-exports.udtct = function(count, callback) {
+exports.udtct = function(target, lbl, count, callback) {
     var results_ct = {};
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
-        results_ct.lbl = conf.cnt[count].name;
+        results_ct.lbl = lbl;
         results_ct['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
@@ -247,79 +249,81 @@ exports.udtct = function(count, callback) {
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ct['m2m:cnt'] = {};
-        results_ct['m2m:cnt'].lbl = conf.cnt[count].name;
+        results_ct['m2m:cnt'].lbl = lbl;
         bodyString = cbor.encode(results_ct).toString('hex');
         console.log(bodyString);
     }
     else {
         results_ct['m2m:cnt'] = {};
-        results_ct['m2m:cnt'].lbl = conf.cnt[count].name;
+        results_ct['m2m:cnt'].lbl = lbl;
         bodyString = JSON.stringify(results_ct);
     }
 
-    http_request(conf.cnt[count].parent + '/' + conf.cnt[count].name, 'put', '', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + conf.cnt[count].name + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request(target, 'put', '', bodyString, function (res, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
         callback(res.headers['x-m2m-rsc'], res_body, count);
     });
 };
 
 
-exports.delct = function(count, callback) {
-    http_request(conf.cnt[count].parent + '/' + conf.cnt[count].name, 'delete', '', '', function (res, res_body) {
-        console.log(count + ' - ' + conf.cnt[count].name + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+exports.delct = function(target, count, callback) {
+    http_request(target, 'delete', '', '', function (res, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
         callback(res.headers['x-m2m-rsc'], res_body, count);
     });
 };
 
-
-exports.delsub = function(count, callback) {
-    http_request(conf.sub[count].parent + '/' + conf.sub[count].name, 'delete', '', '', function (res, res_body) {
-        console.log(count + ' - ' + conf.sub[count].name + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        callback(res.headers['x-m2m-rsc'], res_body, count);
-    });
-};
-
-exports.crtsub = function(count, callback) {
+exports.crtsub = function(parent, rn, nu, count, callback) {
     var results_ss = {};
     var bodyString = '';
     if (conf.ae.bodytype === 'xml') {
         results_ss.enc = {net: [3]};
-        results_ss.nu = [conf.sub[count].nu];
+        results_ss.nu = [nu];
         results_ss.nct = 2;
         results_ss['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "rn": conf.sub[count].name
+            "rn": rn
         };
 
         bodyString = js2xmlparser.parse("m2m:sub", results_ss);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ss['m2m:sub'] = {};
-        results_ss['m2m:sub'].rn = conf.sub[count].name;
+        results_ss['m2m:sub'].rn = rn;
         results_ss['m2m:sub'].enc = {net: [3]};
-        results_ss['m2m:sub'].nu = [conf.sub[count].nu];
+        results_ss['m2m:sub'].nu = [nu];
         results_ss['m2m:sub'].nct = 2;
         bodyString = cbor.encode(results_ss).toString('hex');
         console.log(bodyString);
     }
     else {
         results_ss['m2m:sub'] = {};
-        results_ss['m2m:sub'].rn = conf.sub[count].name;
+        results_ss['m2m:sub'].rn = rn;
         results_ss['m2m:sub'].enc = {net: [3]};
-        results_ss['m2m:sub'].nu = [conf.sub[count].nu];
+        results_ss['m2m:sub'].nu = [nu];
         results_ss['m2m:sub'].nct = 2;
 
         bodyString = JSON.stringify(results_ss);
     }
 
-    http_request(conf.sub[count].parent, 'post', '23', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + conf.sub[count].name + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request(parent, 'post', '23', bodyString, function (res, res_body) {
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+        console.log(res_body);
         callback(res.headers['x-m2m-rsc'], res_body, count);
     });
 };
 
-exports.crtci = function(count, content, socket, callback) {
+exports.delsub = function(target, count, callback) {
+    http_request(target, 'delete', '', '', function (res, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+        console.log(res_body);
+        callback(res.headers['x-m2m-rsc'], res_body, count);
+    });
+};
+
+
+exports.crtci = function(parent, count, content, socket, callback) {
     var results_ci = {};
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
@@ -347,10 +351,8 @@ exports.crtci = function(count, content, socket, callback) {
         bodyString = JSON.stringify(results_ci);
     }
 
-    var parent_path = conf.cnt[count].parent + '/' + conf.cnt[count].name;
-
-    http_request(conf.cnt[count].parent + '/' + conf.cnt[count].name, 'post', '4', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body, parent_path, socket);
+    http_request(parent, 'post', '4', bodyString, function (res, res_body) {
+        callback(res.headers['x-m2m-rsc'], res_body, parent, socket);
     });
 };
 

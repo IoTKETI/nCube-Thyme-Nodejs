@@ -38,26 +38,45 @@ global.req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
 
 
 function mqtt_connect(brokerip) {
-    if(conf.usesecure === 'disable') {
-        mqtt_client = mqtt.connect('mqtt://' + brokerip + ':' + conf.cse.mqttport);
-    }
-    else {
-        var connectOptions = {
-            host: brokerip,
-            port: conf.cse.mqttport,
-            protocol: "mqtts",
-            keepalive: 10,
-            //             clientId: serverUID,
-            protocolId: "MQTT",
-            protocolVersion: 4,
-            clean: true,
-            reconnectPeriod: 2000,
-            connectTimeout: 2000,
-            key: fs.readFileSync("./server-key.pem"),
-            cert: fs.readFileSync("./server-crt.pem"),
-            rejectUnauthorized: false
-        };
-        mqtt_client = mqtt.connect(connectOptions);
+    if(mqtt_client == null) {
+        if (conf.usesecure === 'disable') {
+            if (conf.usesecure === 'disable') {
+                var connectOptions = {
+                    host: brokerip,
+                    port: conf.cse.mqttport,
+    //              username: 'keti',
+    //              password: 'keti123',
+                    protocol: "mqtt",
+                    keepalive: 10,
+    //              clientId: serverUID,
+                    protocolId: "MQTT",
+                    protocolVersion: 4,
+                    clean: true,
+                    reconnectPeriod: 2000,
+                    connectTimeout: 2000,
+                    rejectUnauthorized: false
+                };
+            }
+            else {
+                connectOptions = {
+                    host: brokerip,
+                    port: conf.cse.mqttport,
+                    protocol: "mqtts",
+                    keepalive: 10,
+    //              clientId: serverUID,
+                    protocolId: "MQTT",
+                    protocolVersion: 4,
+                    clean: true,
+                    reconnectPeriod: 2000,
+                    connectTimeout: 2000,
+                    key: fs.readFileSync("./server-key.pem"),
+                    cert: fs.readFileSync("./server-crt.pem"),
+                    rejectUnauthorized: false
+                };
+            }
+
+            mqtt_client = mqtt.connect(connectOptions);
+        }
     }
 
 

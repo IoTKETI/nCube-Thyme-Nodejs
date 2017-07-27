@@ -144,7 +144,9 @@ function create_cnt_all(count, callback) {
         callback(2001, count);
     }
     else {
-        sh_adn.crtct(count, function (rsc, res_body, count) {
+        var parent = conf.cnt[count].parent;
+        var rn = conf.cnt[count].name;
+        sh_adn.crtct(parent, rn, count, function (rsc, res_body, count) {
             if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
                 count++;
                 if(conf.cnt.length > count) {
@@ -168,7 +170,8 @@ function delete_sub_all(count, callback) {
         callback(2001, count);
     }
     else {
-        sh_adn.delsub(count, function (rsc, res_body, count) {
+        var target = conf.sub[count].parent + '/' + conf.sub[count].name;
+        sh_adn.delsub(target, count, function (rsc, res_body, count) {
             if(rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
                 count++;
                 if(conf.sub.length > count) {
@@ -192,7 +195,10 @@ function create_sub_all(count, callback) {
         callback(2001, count);
     }
     else {
-        sh_adn.crtsub(count, function (rsc, res_body, count) {
+        var parent = conf.sub[count].parent;
+        var rn = conf.sub[count].name;
+        var nu = conf.sub[count].nu;
+        sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
             if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
                 count++;
                 if(conf.sub.length > count) {
@@ -214,7 +220,7 @@ function create_sub_all(count, callback) {
 function http_watchdog() {
     if (sh_state === 'crtae') {
         console.log('[sh_state] : ' + sh_state);
-        sh_adn.crtae(function (status, res_body) {
+        sh_adn.crtae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
             console.log(res_body);
             if (status == 5106 || status == 2001) {
                 ae_response_action(status, res_body, function (status, aeid) {
@@ -234,7 +240,7 @@ function http_watchdog() {
         }
 
         console.log('[sh_state] : ' + sh_state);
-        sh_adn.rtvae(function (status, res_body) {
+        sh_adn.rtvae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
             if (status == 2000) {
                 ae_response_action(status, res_body, function (status, aeid) {
                     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
@@ -300,42 +306,44 @@ wdt.set_wdt(require('shortid').generate(), 2, http_watchdog);
 
 
 function mqtt_connect(serverip, noti_topic) {
-    if(conf.usesecure === 'disable') {
-        var connectOptions = {
-            host: serverip,
-            port: conf.cse.mqttport,
-//            username: 'ryeubi',
-//            password: 'Dksdlfduq@2',
-            protocol: "mqtt",
-            keepalive: 10,
-            //             clientId: serverUID,
-            protocolId: "MQTT",
-            protocolVersion: 4,
-            clean: true,
-            reconnectPeriod: 2000,
-            connectTimeout: 2000,
-            rejectUnauthorized: false
-        };
-    }
-    else {
-        connectOptions = {
-            host: serverip,
-            port: conf.cse.mqttport,
-            protocol: "mqtts",
-            keepalive: 10,
-            //             clientId: serverUID,
-            protocolId: "MQTT",
-            protocolVersion: 4,
-            clean: true,
-            reconnectPeriod: 2000,
-            connectTimeout: 2000,
-            key: fs.readFileSync("./server-key.pem"),
-            cert: fs.readFileSync("./server-crt.pem"),
-            rejectUnauthorized: false
-        };
-    }
+    if(mqtt_client == null) {
+        if (conf.usesecure === 'disable') {
+            var connectOptions = {
+                host: serverip,
+                port: conf.cse.mqttport,
+//              username: 'keti',
+//              password: 'keti123',
+                protocol: "mqtt",
+                keepalive: 10,
+//              clientId: serverUID,
+                protocolId: "MQTT",
+                protocolVersion: 4,
+                clean: true,
+                reconnectPeriod: 2000,
+                connectTimeout: 2000,
+                rejectUnauthorized: false
+            };
+        }
+        else {
+            connectOptions = {
+                host: serverip,
+                port: conf.cse.mqttport,
+                protocol: "mqtts",
+                keepalive: 10,
+//              clientId: serverUID,
+                protocolId: "MQTT",
+                protocolVersion: 4,
+                clean: true,
+                reconnectPeriod: 2000,
+                connectTimeout: 2000,
+                key: fs.readFileSync("./server-key.pem"),
+                cert: fs.readFileSync("./server-crt.pem"),
+                rejectUnauthorized: false
+            };
+        }
 
-    mqtt_client = mqtt.connect(connectOptions);
+        mqtt_client = mqtt.connect(connectOptions);
+    }
 
     mqtt_client.on('connect', function () {
         mqtt_client.subscribe(noti_topic);
