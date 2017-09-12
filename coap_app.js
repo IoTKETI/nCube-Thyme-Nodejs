@@ -96,63 +96,60 @@ function ready_for_notification() {
 
 
 function create_cnt_all(count, callback) {
-    sh_adn.crtct(count, function (rsc, res_body, count) {
-        console.log('x-m2m-rsc : ' + rsc + ' <----');
-        if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-            count++;
-            if(conf.cnt.length > count) {
-                create_cnt_all(count, function (rsc, count) {
-                    callback(rsc, count);
-                });
-            }
-            else {
+    if(conf.cnt.length == 0) {
+        callback(2001, count);
+    }
+    else {
+        var parent = conf.cnt[count].parent;
+        var rn = conf.cnt[count].name;
+        sh_adn.crtct(parent, rn, count, function (rsc, res_body, count) {
+            console.log('x-m2m-rsc : ' + rsc + ' <----');
+            if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
                 callback(rsc, count);
             }
-        }
-        else {
-            callback('9999', count);
-        }
-    });
+            else {
+                callback('9999', count);
+            }
+        });
+    }
 }
 
 function delete_sub_all(count, callback) {
-    sh_adn.delsub(count, function (rsc, res_body, count) {
-        console.log('x-m2m-rsc : ' + rsc + ' <----');
-        if(rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
-            count++;
-            if(conf.sub.length > count) {
-                delete_sub_all(count, function (rsc, count) {
-                    callback(rsc, count);
-                })
-            }
-            else {
+    if(conf.sub.length == 0) {
+        callback(2001, count);
+    }
+    else {
+        var target = conf.sub[count].parent + '/' + conf.sub[count].name;
+        sh_adn.delsub(target, count, function (rsc, res_body, count) {
+            console.log('x-m2m-rsc : ' + rsc + ' <----');
+            if (rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
                 callback(rsc, count);
             }
-        }
-        else {
-            callback('9999', count);
-        }
-    });
+            else {
+                callback('9999', count);
+            }
+        });
+    }
 }
 
 function create_sub_all(count, callback) {
-    sh_adn.crtsub(count, function (rsc, res_body, count) {
-        console.log('x-m2m-rsc : ' + rsc + ' <----');
-        if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-            count++;
-            if(conf.sub.length > count) {
-                create_sub_all(count, function (rsc, count) {
-                    callback(rsc, count);
-                })
-            }
-            else {
+    if(conf.sub.length == 0) {
+        callback(2001, count);
+    }
+    else {
+        var parent = conf.sub[count].parent;
+        var rn = conf.sub[count].name;
+        var nu = conf.sub[count].nu;
+        sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
+            console.log('x-m2m-rsc : ' + rsc + ' <----');
+            if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
                 callback(rsc, count);
             }
-        }
-        else {
-            callback('9999', count);
-        }
-    });
+            else {
+                callback('9999', count);
+            }
+        });
+    }
 }
 
 function ae_response_action(status, res_body, callback) {
@@ -191,6 +188,8 @@ function coap_watchdog() {
                 ae_response_action(status, res_body, function (status, aeid) {
                     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
                     sh_state = 'crtct';
+                    request_count = 0;
+                    return_count = 0;
                 });
             }
             else if(status == 4105) {
@@ -210,6 +209,8 @@ function coap_watchdog() {
                 ae_response_action(status, res_body, function (status, aeid) {
                     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
                     sh_state = 'crtct';
+                    request_count = 0;
+                    return_count = 0;
                 });
             }
             else {
@@ -219,42 +220,65 @@ function coap_watchdog() {
     }
     else if(sh_state === 'crtct') {
         console.log('[sh_state] : ' + sh_state);
-        request_count = 0;
-        return_count = 0;
-        create_cnt_all(0, function(status, count) {
-            if(conf.cnt.length <= count) {
-                sh_state = 'delsub';
-            }
-        });
+        if(return_count == 0) {
+            create_cnt_all(request_count, function (status, count) {
+                request_count = ++count;
+                return_count = 0;
+                if (conf.cnt.length <= count) {
+                    sh_state = 'delsub';
+                    request_count = 0;
+                    return_count = 0;
+                }
+            });
+        }
+        return_count++;
+        if(return_count >= 3) {
+            return_count = 0;
+        }
     }
     else if(sh_state === 'delsub') {
         console.log('[sh_state] : ' + sh_state);
-        request_count = 0;
-        return_count = 0;
-        delete_sub_all(0, function(status, count) {
-            if(conf.sub.length <= count) {
-                sh_state = 'crtsub';
-            }
-        });
+        if(return_count == 0) {
+            delete_sub_all(request_count, function (status, count) {
+                request_count = ++count;
+                return_count = 0;
+                if (conf.sub.length <= count) {
+                    sh_state = 'crtsub';
+                    request_count = 0;
+                    return_count = 0;
+                }
+            });
+        }
+        return_count++;
+        if(return_count >= 3) {
+            return_count = 0;
+        }
     }
     else if(sh_state === 'crtsub') {
         console.log('[sh_state] : ' + sh_state);
-        request_count = 0;
-        return_count = 0;
+        if(return_count == 0) {
+            create_sub_all(request_count, function (status, count) {
+                request_count = ++count;
+                return_count = 0;
+                if (conf.sub.length <= count) {
+                    sh_state = 'crtci';
+                    request_count = 0;
+                    return_count = 0;
 
-        create_sub_all(0, function(status, count) {
-            if(conf.sub.length <= count) {
-                sh_state = 'crtci';
+                    ready_for_notification();
 
-                ready_for_notification();
+                    tas.ready();
 
-                tas.ready();
-
-                var _ae = {};
-                _ae.id = conf.ae.id;
-                fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
-            }
-        });
+                    var _ae = {};
+                    _ae.id = conf.ae.id;
+                    fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
+                }
+            });
+        }
+        return_count++;
+        if(return_count >= 3) {
+            return_count = 0;
+        }
     }
     else if(sh_state === 'crtci') {
 

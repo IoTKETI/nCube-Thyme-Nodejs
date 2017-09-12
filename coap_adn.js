@@ -158,35 +158,35 @@ exports.rtvae = function (callback) {
 };
 
 
-exports.crtct = function(count, callback) {
+exports.crtct = function(parent, rn, count, callback) {
     var results_ct = {};
 
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
-        results_ct.lbl = conf.cnt[count].name;
+        results_ct.lbl = rn;
         results_ct['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "rn": conf.cnt[count].name
+            "rn": rn
         };
 
         bodyString = js2xmlparser.parse("m2m:cnt", results_ct);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ct['m2m:cnt'] = {};
-        results_ct['m2m:cnt'].rn = conf.cnt[count].name;
-        results_ct['m2m:cnt'].lbl = [conf.cnt[count].name];
+        results_ct['m2m:cnt'].rn = rn;
+        results_ct['m2m:cnt'].lbl = [rn];
         bodyString = cbor.encode(results_ct).toString('hex');
         console.log(bodyString);
     }
     else {
         results_ct['m2m:cnt'] = {};
-        results_ct['m2m:cnt'].rn = conf.cnt[count].name;
-        results_ct['m2m:cnt'].lbl = [conf.cnt[count].name];
+        results_ct['m2m:cnt'].rn = rn;
+        results_ct['m2m:cnt'].lbl = [rn];
         bodyString = JSON.stringify(results_ct);
     }
 
-    coap_request(conf.cnt[count].parent, 'post', '3', bodyString, function (res, res_body) {
+    coap_request(parent, 'post', '3', bodyString, function (res, res_body) {
         for (var idx in res.options) {
             if (res.options.hasOwnProperty(idx)) {
                 if (res.options[idx].name === '265') { // 'X-M2M-RSC
@@ -195,62 +195,48 @@ exports.crtct = function(count, callback) {
                 }
             }
         }
-        console.log(count + ' - ' + conf.cnt[count].name + ' - x-m2m-rsc : ' + rsc + ' <----');
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + rsc + ' <----');
         callback(rsc, res_body, count);
     });
 };
 
-exports.delsub = function(count, callback) {
-    coap_request(conf.sub[count].parent + '/' + conf.sub[count].name, 'delete', '', '', function (res, res_body) {
-        for (var idx in res.options) {
-            if (res.options.hasOwnProperty(idx)) {
-                if (res.options[idx].name === '265') { // 'X-M2M-RSC
-                    var rsc = (Buffer.isBuffer(res.options[idx].value) ? res.options[idx].value.readUInt16BE(0).toString() : res.options[idx].value.toString());
-                    break;
-                }
-            }
-        }
-        console.log(count + ' - ' + conf.sub[count].name + ' - x-m2m-rsc : ' + rsc + ' <----');
-        callback(rsc, res_body, count);
-    });
-};
 
-exports.crtsub = function(count, callback) {
+exports.crtsub = function(parent, rn, nu, count, callback) {
     var results_ss = {};
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
         //results_ss.rn = name;
         results_ss.enc = {net:[3]};
-        results_ss.nu = [conf.sub[count].nu];
+        results_ss.nu = [nu];
         results_ss.nct = 2;
         results_ss['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "rn": conf.sub[count].name
+            "rn": rn
         };
 
         bodyString = js2xmlparser.parse("m2m:sub", results_ss);
     }
     else if(conf.ae.bodytype === 'cbor') {
         results_ss['m2m:sub'] = {};
-        results_ss['m2m:sub'].rn = conf.sub[count].name;
+        results_ss['m2m:sub'].rn = rn;
         results_ss['m2m:sub'].enc = {net: [3]};
-        results_ss['m2m:sub'].nu = [conf.sub[count].nu];
+        results_ss['m2m:sub'].nu = [nu];
         results_ss['m2m:sub'].nct = 2;
         bodyString = cbor.encode(results_ss).toString('hex');
         console.log(bodyString);
     }
     else {
         results_ss['m2m:sub'] = {};
-        results_ss['m2m:sub'].rn = conf.sub[count].name;
+        results_ss['m2m:sub'].rn = rn;
         results_ss['m2m:sub'].enc = {net:[3]};
-        results_ss['m2m:sub'].nu = [conf.sub[count].nu];
+        results_ss['m2m:sub'].nu = [nu];
         results_ss['m2m:sub'].nct = 2;
 
         bodyString = JSON.stringify(results_ss);
     }
 
-    coap_request(conf.sub[count].parent, 'post', '23', bodyString, function (res, res_body) {
+    coap_request(parent, 'post', '23', bodyString, function (res, res_body) {
         for (var idx in res.options) {
             if (res.options.hasOwnProperty(idx)) {
                 if (res.options[idx].name === '265') { // 'X-M2M-RSC
@@ -259,7 +245,22 @@ exports.crtsub = function(count, callback) {
                 }
             }
         }
-        console.log(count + ' - ' + conf.sub[count].name + ' - x-m2m-rsc : ' + rsc + ' <----');
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + rsc + ' <----');
+        callback(rsc, res_body, count);
+    });
+};
+
+exports.delsub = function(target, count, callback) {
+    coap_request(target, 'delete', '', '', function (res, res_body) {
+        for (var idx in res.options) {
+            if (res.options.hasOwnProperty(idx)) {
+                if (res.options[idx].name === '265') { // 'X-M2M-RSC
+                    var rsc = (Buffer.isBuffer(res.options[idx].value) ? res.options[idx].value.readUInt16BE(0).toString() : res.options[idx].value.toString());
+                    break;
+                }
+            }
+        }
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + rsc + ' <----');
         callback(rsc, res_body, count);
     });
 };

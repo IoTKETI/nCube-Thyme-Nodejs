@@ -26,7 +26,7 @@ var acp = {};
 conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
 // build cse
-cse.host        = '203.253.128.161';
+cse.host        = 'localhost';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius';
@@ -40,8 +40,9 @@ if(aei != 'S') {
 else {
     ae.id = 'S';
 }
+ae.id = 'mobius';
 ae.parent       = '/' + cse.name;
-ae.name         = 'ae-edu3';
+ae.name         = 'mobius';
 ae.appid        = 'measure_co2';
 ae.port         = '9727';
 ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'
@@ -76,7 +77,7 @@ sub_arr[count].name = 'sub-ctrl2';
 //sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9';
 sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype;
 //var ip = require("ip");
-//sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti';
+//sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=' + ae.bodytype;
 //sub_arr[count++].nu = 'coap://203.254.173.104:' + ae.port + '/noti';
 
 // build acp: not complete
