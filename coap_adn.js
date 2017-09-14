@@ -26,7 +26,7 @@ function coap_request(path, method, ty, bodyString, callback) {
         port: conf.cse.port,
         pathname: path,
         method: method,
-        confirmable: 'true',
+        confirmable: 'false',
         options: {
             'Accept': 'application/'+conf.ae.bodytype
         }
@@ -61,6 +61,7 @@ function coap_request(path, method, ty, bodyString, callback) {
         });
 
         res.on('end', function () {
+            console.log(res_body);
             if(conf.ae.bodytype == 'xml') {
                 var parser = new xml2js.Parser({explicitArray: false});
                 parser.parseString(res_body, function (err, jsonObj) {
