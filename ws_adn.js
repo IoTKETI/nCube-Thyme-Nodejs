@@ -308,7 +308,7 @@ exports.crtsub = function(count, callback) {
     }
 };
 
-exports.crtci = function(count, content, socket, callback) {
+exports.crtci = function(parent, count, content, socket, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;

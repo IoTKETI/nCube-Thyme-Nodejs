@@ -265,9 +265,9 @@ function ws_watchdog() {
 
                 ready_for_notification();
 
-                var _ae = {};
-                _ae.id = conf.ae.id;
-                fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
+                // var _ae = {};
+                // _ae.id = conf.ae.id;
+                // fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
             }
         });
     }

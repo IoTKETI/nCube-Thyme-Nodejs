@@ -266,7 +266,7 @@ exports.delsub = function(target, count, callback) {
     });
 };
 
-exports.crtci = function(count, content, socket, callback) {
+exports.crtci = function(parent, count, content, socket, callback) {
     var results_ci = {};
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
@@ -292,18 +292,16 @@ exports.crtci = function(count, content, socket, callback) {
         bodyString = JSON.stringify(results_ci);
     }
 
-    var parent_path = conf.cnt[count].parent + '/' + conf.cnt[count].name;
-
-    coap_request(conf.cnt[count].parent + '/' + conf.cnt[count].name, 'post', '4', bodyString, function (res, res_body) {
+    coap_request(parent, 'post', '4', bodyString, function (res, res_body) {
         for (var idx in res.options) {
             if (res.options.hasOwnProperty(idx)) {
-                if (res.options[idx].name === '265') { // 'X-M2M-RSC
+                if (res.options[idx].name == '265') { // 'X-M2M-RSC
                     var rsc = (Buffer.isBuffer(res.options[idx].value) ? res.options[idx].value.readUInt16BE(0).toString() : res.options[idx].value.toString());
                     break;
                 }
             }
         }
-        callback(rsc, res_body, parent_path, socket);
+        callback(rsc, res_body, parent, socket);
     });
 };
 

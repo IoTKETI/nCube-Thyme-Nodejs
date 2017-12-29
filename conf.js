@@ -12,10 +12,6 @@
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var fs = require('fs');
-var aei = JSON.parse(fs.readFileSync('aei.json')).id;
-
-
 var conf = {};
 var cse = {};
 var ae = {};
@@ -26,7 +22,7 @@ var acp = {};
 conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
 // build cse
-cse.host        = 'localhost';
+cse.host        = '203.253.128.161';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius';
@@ -34,15 +30,10 @@ cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-if(aei != 'S') {
-    ae.id = aei;
-}
-else {
-    ae.id = 'S';
-}
-ae.id = 'mobius';
+ae.name         = 'mobius3';
+ae.id           = 'S' + ae.name;
+
 ae.parent       = '/' + cse.name;
-ae.name         = 'mobius';
 ae.appid        = 'measure_co2';
 ae.port         = '9727';
 ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'
@@ -52,13 +43,16 @@ ae.tasport      = '3105';
 var count = 0;
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'cnt-co2';
+cnt_arr[count++].name = 'co2';
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'cnt-led';
-//cnt_arr[count] = {};
-//cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-//cnt_arr[count++].name = 'cnt-timer';
+cnt_arr[count++].name = 'led';
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+cnt_arr[count++].name = 'temp';
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+cnt_arr[count++].name = 'tvoc';
 
 // build sub
 count = 0;
@@ -69,16 +63,15 @@ count = 0;
 
 sub_arr[count] = {};
 sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub-ctrl2';
+sub_arr[count].name = 'sub';
 
-//var ip = require("ip");
-//sub_arr[count++].nu = conf.useprotocol + '://' + ip.address() + ':' + ae.port + '/noti';
-
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9';
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype;
-//var ip = require("ip");
+var ip = require("ip");
+sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti';
 //sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=' + ae.bodytype;
 //sub_arr[count++].nu = 'coap://203.254.173.104:' + ae.port + '/noti';
+//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9';
+//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype;
+
 
 // build acp: not complete
 acp.parent = '/' + cse.name + '/' + ae.name;

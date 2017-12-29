@@ -27,8 +27,9 @@ var t_count = 0;
 function timer_upload_action() {
     if (sh_state == 'crtci') {
         for (var j = 0; j < conf.cnt.length; j++) {
-            if (conf.cnt[j].name == 'cnt-timer') {
-                var content = JSON.stringify({value: 'TAS' + t_count++});
+            if (conf.cnt[j].name == 'timer') {
+                //var content = JSON.stringify({value: 'TAS' + t_count++});
+                var content = parseInt(Math.random()*100).toString();
                 console.log('thyme cnt-timer ' + content + ' ---->');
                 var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
                 sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
@@ -40,7 +41,7 @@ function timer_upload_action() {
     }
 }
 
-wdt.set_wdt(require('shortid').generate(), 2, timer_upload_action);
+wdt.set_wdt(require('shortid').generate(), 10, timer_upload_action);
 
 var _server = null;
 exports.ready = function tas_ready () {

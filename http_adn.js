@@ -327,8 +327,6 @@ exports.crtci = function(parent, count, content, socket, callback) {
     var results_ci = {};
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
-        //results_ci.rn = (ciname != null && ciname != '') ? ciname : '';
-        //var ci_nm = (ciname != null && ciname != '') ? ciname : '';
         results_ci.con = content;
 
         results_ci['@'] = {
