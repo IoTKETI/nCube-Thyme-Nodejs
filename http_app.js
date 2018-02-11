@@ -101,39 +101,6 @@ function ready_for_notification() {
 }
 
 function ae_response_action(status, res_body, callback) {
-/*    if(conf.ae.bodytype === 'xml') {
-        var message = res_body;
-        var parser = new xml2js.Parser({explicitArray: false});
-        parser.parseString(message.toString(), function (err, result) {
-            if (err) {
-                console.log('[rtvae xml2js parser error]');
-            }
-            else {
-                var aeid = result['m2m:ae']['aei'];
-                conf.ae.id = aeid;
-                callback(status, aeid);
-            }
-        });
-    }
-    else if(conf.ae.bodytype === 'cbor') {
-        cbor.decodeFirst(res_body, function(err, result) {
-            if (err) {
-                console.log('[rtvae cbor parser error]');
-            }
-            else {
-                var aeid = result['m2m:ae']['aei'];
-                conf.ae.id = aeid;
-                callback(status, aeid);
-            }
-        });
-    }
-    else {
-        var result = JSON.parse(res_body);
-        var aeid = result['m2m:ae']['aei'];
-        conf.ae.id = aeid;
-        callback(status, aeid);
-    }
-*/
     var aeid = res_body['m2m:ae']['aei'];
     conf.ae.id = aeid;
     callback(status, aeid);
@@ -198,7 +165,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         sh_adn.crtae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
             console.log(res_body);
-            if (status == 5106 || status == 2001) {
+            if (status == 2001) {
                 ae_response_action(status, res_body, function (status, aeid) {
                     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
                     sh_state = 'crtct';
@@ -206,7 +173,7 @@ function http_watchdog() {
                     return_count = 0;
                 });
             }
-            else if (status == 4105) {
+            else if (status == 5106 || status == 4105) {
                 console.log('x-m2m-rsc : ' + status + ' <----');
                 sh_state = 'rtvae'
             }
@@ -220,12 +187,17 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         sh_adn.rtvae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
             if (status == 2000) {
-                ae_response_action(status, res_body, function (status, aeid) {
-                    console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
+                var aeid = res_body['m2m:ae']['aei'];
+                console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
+
+                if(conf.ae.id != aeid) {
+                    console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
+                }
+                else {
                     sh_state = 'crtct';
                     request_count = 0;
                     return_count = 0;
-                });
+                }
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');

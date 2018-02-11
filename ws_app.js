@@ -207,11 +207,11 @@ function ws_watchdog() {
         console.log('[sh_state] : ' + sh_state);
 
         sh_adn.crtae(function(status, res_body) {
-            if(status == 5106 || status == 2001) {
+            if(status == 2001) {
                 ae_response_action(status, res_body);
                 sh_state = 'crtct';
             }
-            else if(status == 4105) {
+            else if(status == 5106 || status == 4105) {
                 console.log('x-m2m-rsc : ' + status + ' <----');
                 sh_state = 'rtvae'
             }
@@ -220,9 +220,16 @@ function ws_watchdog() {
     else if(sh_state == 'rtvae') {
         console.log('[sh_state] : ' + sh_state);
         sh_adn.rtvae(function(status, res_body) {
-            if(status == 5106 || status == 2000) {
-                ae_response_action(status, res_body);
-                sh_state = 'crtct';
+            if (status == 2000) {
+                var aeid = res_body['m2m:ae']['aei'];
+                console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
+
+                if(conf.ae.id != aeid) {
+                    console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
+                }
+                else {
+                    sh_state = 'crtct';
+                }
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');

@@ -19,10 +19,10 @@ var cnt_arr = [];
 var sub_arr = [];
 var acp = {};
 
-conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
+conf.useprotocol = 'mqtt'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
 // build cse
-cse.host        = '203.253.128.161';
+cse.host        = 'localhost';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius';
@@ -30,7 +30,7 @@ cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'mobius3';
+ae.name         = 'edu4';
 ae.id           = 'S' + ae.name;
 
 ae.parent       = '/' + cse.name;
@@ -65,13 +65,12 @@ sub_arr[count] = {};
 sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
 sub_arr[count].name = 'sub';
 
-var ip = require("ip");
-sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti';
+// http
+//var ip = require("ip");
 //sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=' + ae.bodytype;
-//sub_arr[count++].nu = 'coap://203.254.173.104:' + ae.port + '/noti';
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9';
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype;
 
+// mqtt
+sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9&ct=' + ae.bodytype;
 
 // build acp: not complete
 acp.parent = '/' + cse.name + '/' + ae.name;

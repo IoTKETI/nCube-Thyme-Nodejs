@@ -27,15 +27,13 @@ else {
 }
 
 var reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/'+cseid+'/#';
+global.req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
 var resp_topic = '/oneM2M/resp/'+conf.ae.id+'/'+cseid+'/#';
 var noti_topic = '/oneM2M/req/'+cseid+'/'+conf.ae.id+'/#';
 
 global.sh_adn = require('./mqtt_adn');
 var noti = require('./noti');
 var tas = require('./thyme_tas');
-
-global.req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
-
 
 function mqtt_connect(brokerip) {
     if(mqtt_client == null) {
@@ -206,8 +204,8 @@ var return_count = 0;
 var request_count = 0;
 
 function ae_response_action(status, result) {
+    var cseid = conf.cse.id.split('/')[0];
     var aeid = result['m2m:ae']['aei'];
-
 
     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
 
@@ -220,6 +218,7 @@ function ae_response_action(status, result) {
     //fs.writeFileSync('aei.json', JSON.stringify(conf.ae.id, null, 4), 'utf8');
 
     reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/'+cseid+'/#';
+    req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
     resp_topic = '/oneM2M/resp/'+conf.ae.id+'/'+cseid+'/#';
     noti_topic = '/oneM2M/req/'+cseid+'/'+conf.ae.id+'/#';
 
@@ -298,11 +297,11 @@ function mqtt_watchdog() {
         console.log('[sh_state] : ' + sh_state);
 
         sh_adn.crtae(function(status, res_body) {
-            if(status == 5106 || status == 2001) {
+            if(status == 2001) {
                 ae_response_action(status, res_body);
                 sh_state = 'crtct';
             }
-            else if(status == 4105) {
+            else if(status == 5106 || status == 4105) {
                 console.log('x-m2m-rsc : ' + status + ' <----');
                 sh_state = 'rtvae'
             }
@@ -311,9 +310,16 @@ function mqtt_watchdog() {
     else if(sh_state == 'rtvae') {
         console.log('[sh_state] : ' + sh_state);
         sh_adn.rtvae(function(status, res_body) {
-            if(status == 5106 || status == 2000) {
-                ae_response_action(status, res_body);
-                sh_state = 'crtct';
+            if (status == 2000) {
+                var aeid = res_body['m2m:ae']['aei'];
+                console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
+
+                if(conf.ae.id != aeid) {
+                    console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
+                }
+                else {
+                    sh_state = 'crtct';
+                }
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
