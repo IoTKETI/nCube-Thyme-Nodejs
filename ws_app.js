@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2017, OCEAN
+ * Copyright (c) 2018, OCEAN
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
@@ -10,7 +10,7 @@
 
 /**
  * @file
- * @copyright KETI Korea 2017, OCEAN
+ * @copyright KETI Korea 2018, OCEAN
  * @author Il Yeup Ahn [iyahn@keti.re.kr]
  * Created by ryeubi on 2017-06-07.
  */
