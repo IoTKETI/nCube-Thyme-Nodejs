@@ -19,10 +19,10 @@ var cnt_arr = [];
 var sub_arr = [];
 var acp = {};
 
-conf.useprotocol = 'mqtt'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
+conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
 // build cse
-cse.host        = 'localhost';
+cse.host        = '203.253.128.161';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius';
