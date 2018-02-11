@@ -1,4 +1,8 @@
 # &Cube-Thyme for Node.js
+
+## version 
+2.1.0
+
 ## Introduction
 &Cube-Thyme is an open source IoT device application entity based on the oneM2M (http://www.oneM2M.org) standard. &Cube-Thyme consists of three versions: Node.js version, Java version and Android version.
 
@@ -23,12 +27,15 @@ Node.js® is a JavaScript runtime built on Chrome's V8 JavaScript engine. Node.j
 - Open the &Cube-Thyme for Node.js source home directory
 - Install dependent libraries as below
 ```
-npm install
+ 
+ npm install
+ 
 ```
 - Modify configuration file "conf.js" per your setting
 ```
+ 
 conf.useprotocol = 'http';              // select one for 'http' or 'mqtt' or 'coap' or 'ws'
-
+ 
 // build cse 
 cse.host        = '203.253.128.161';    //CSE host IP
 cse.port        = '7579';               //CSE http hosting port
@@ -36,21 +43,17 @@ cse.name        = 'Mobius';
 cse.id          = '/Mobius';
 cse.mqttport    = '1883';               //CSE mqtt broaker port
 cse.wsport      = '7577';
-
+ 
 // build ae
-if(aei != 'S') {
-    ae.id = aei;
-}
-else {
-    ae.id = 'S';
-}
+ae.name         = 'edu4';               //AE name
+ae.id           = 'S' + ae.name;        //AE-ID
+ 
 ae.parent       = '/' + cse.name;
-ae.name         = 'ae-edu2';            //AE name
-ae.appid        = 'measure_co2';
+ae.appid        = 'education';
 ae.port         = '9727';
 ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'
 ae.tasport      = '3105';
-
+ 
 // build cnt 
 var count = 0;
 cnt_arr[count] = {}; 
@@ -59,16 +62,14 @@ cnt_arr[count++].name = 'cnt-co2';      //CNT name
 cnt_arr[count] = {}; 
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
 cnt_arr[count++].name = 'cnt-led';      //CNT name
-
+ 
 // build sub 
 count = 0;
-
 sub_arr[count] = {}; 
 sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
 sub_arr[count].name = 'sub-ctrl2';      //Subsctiption name
-
 sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype;
-
+ 
 ```
 
 ## Running
@@ -83,6 +84,7 @@ node thyme.js
 
 ## Dependency Libraries
 This is the list of library dependencies for &Cube:Thyme Node.js 
+
 - body-parser
 - cbor
 - coap
