@@ -455,3 +455,19 @@ app.post('/:resourcename0', onem2mParser, function(request, response) {
 app.get('/conf', onem2mParser, function(request, response, next) {
 
 });
+
+/* for testing
+app.use(function(request, response, next) {
+    var fullBody = '';
+    request.on('data', function (chunk) {
+        fullBody += chunk.toString();
+    });
+    request.on('end', function () {
+        request.body = fullBody;
+
+        console.log(fullBody);
+
+        response.status(200).send('');
+    });
+});
+*/

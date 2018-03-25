@@ -29,6 +29,9 @@ exports.parse_sgn = function (rqi, pc, callback) {
         }
         else { // 'short'
             if (sgnObj.sur) {
+                if(sgnObj.sur.charAt(0) != '/') {
+                    sgnObj.sur = '/' + sgnObj.sur;
+                }
                 var path_arr = sgnObj.sur.split('/');
             }
 
