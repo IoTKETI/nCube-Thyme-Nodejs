@@ -1,6 +1,6 @@
 {
   "name": "thyme",
-  "version": "1.7.2",
+  "version": "2.3.0",
   "dependencies": {
     "body-parser": "^1.17.0",
     "cbor": "^3.0.0",
@@ -21,11 +21,11 @@
     "xmlbuilder": "^9.0.1"
   },
   "description": "&Cube:Thyme",
-  "main": "app.js",
+  "main": "thyme.js",
   "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Il Yeup Ahn, KETI",
-  "license": "ISC"
+  "license": "BSD-3-Clause"
 }
