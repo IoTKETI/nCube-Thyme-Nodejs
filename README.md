@@ -1,7 +1,7 @@
 # &Cube-Thyme for Node.js
 
 ## version 
-2.1.0
+2.3.0
 
 ## Introduction
 &Cube-Thyme is an open source IoT device application entity based on the oneM2M (http://www.oneM2M.org) standard. &Cube-Thyme consists of three versions: Node.js version, Java version and Android version.

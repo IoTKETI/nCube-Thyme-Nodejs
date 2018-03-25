@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, OCEAN
+ * Copyright (c) 2018, OCEAN
  * All rights reserved.
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
  * 1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
@@ -455,3 +455,19 @@ app.post('/:resourcename0', onem2mParser, function(request, response) {
 app.get('/conf', onem2mParser, function(request, response, next) {
 
 });
+
+/* for testing
+app.use(function(request, response, next) {
+    var fullBody = '';
+    request.on('data', function (chunk) {
+        fullBody += chunk.toString();
+    });
+    request.on('end', function () {
+        request.body = fullBody;
+
+        console.log(fullBody);
+
+        response.status(200).send('');
+    });
+});
+*/
