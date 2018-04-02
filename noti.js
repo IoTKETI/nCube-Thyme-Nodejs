@@ -60,6 +60,12 @@ exports.parse_sgn = function (rqi, pc, callback) {
                 cinObj = {};
                 cinObj.sud = sgnObj.sud;
             }
+            else if (sgnObj.vrq) {
+                console.log('[mqtt_noti_action] received notification of verification');
+                cinObj = {};
+                cinObj.vrq = sgnObj.vrq;
+            }
+
             else {
                 console.log('[mqtt_noti_action] nev tag of m2m:sgn is none. m2m:notification format mismatch with oneM2M spec.');
                 cinObj = null;
@@ -151,7 +157,7 @@ exports.ws_noti_action = function(connection, bodytype, jsonObj) {
 
         _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
             if(cinObj) {
-                if(cinObj.sud) {
+                if(cinObj.sud || cinObj.vrq) {
                     _this.response_ws(connection, 2001, '', conf.ae.id, rqi, '', bodytype);
                 }
                 else {
@@ -207,7 +213,7 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj) {
 
         _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
             if(cinObj) {
-                if(cinObj.sud) {
+                if(cinObj.sud || cinObj.vrq) {
                     var resp_topic = '/oneM2M/resp/' + topic_arr[3] + '/' + topic_arr[4] + '/' + topic_arr[5];
                     _this.response_mqtt(resp_topic, 2001, '', conf.ae.id, rqi, '', topic_arr[5]);
                 }
@@ -251,7 +257,7 @@ exports.http_noti_action = function (rqi, pc, bodytype, response) {
 
     _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
         if (cinObj) {
-            if(cinObj.sud) {
+            if(cinObj.sud || cinObj.vrq) {
                 response.setHeader('X-M2M-RSC', '2001');
                 response.setHeader('X-M2M-RI', rqi);
                 response.status(201).end('<h1>success to receive notification</h1>');
@@ -291,7 +297,7 @@ exports.coap_noti_action = function (rqi, pc, bodytype, response) {
 
     _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
         if (cinObj) {
-            if(cinObj.sud) {
+            if(cinObj.sud || cinObj.vrq) {
                 response.code = '2.01';
                 response.end('<h1>success to receive notification</h1>');
             }
