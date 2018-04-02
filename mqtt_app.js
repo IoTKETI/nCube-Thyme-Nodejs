@@ -204,7 +204,6 @@ var return_count = 0;
 var request_count = 0;
 
 function ae_response_action(status, result) {
-    var cseid = conf.cse.id.split('/')[0];
     var aeid = result['m2m:ae']['aei'];
 
     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');

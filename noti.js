@@ -55,6 +55,11 @@ exports.parse_sgn = function (rqi, pc, callback) {
                     cinObj = null;
                 }
             }
+            else if (sgnObj.sud) {
+                console.log('[mqtt_noti_action] received notification of verification');
+                cinObj = {};
+                cinObj.sud = sgnObj.sud;
+            }
             else {
                 console.log('[mqtt_noti_action] nev tag of m2m:sgn is none. m2m:notification format mismatch with oneM2M spec.');
                 cinObj = null;
@@ -146,27 +151,33 @@ exports.ws_noti_action = function(connection, bodytype, jsonObj) {
 
         _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
             if(cinObj) {
-                for (var i = 0; i < conf.sub.length; i++) {
-                    if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length-1] === path_arr[path_arr.length-2]) {
-                        if (conf.sub[i].name === path_arr[path_arr.length-1]) {
-                            _this.response_ws(connection, 2001, '', conf.ae.id, rqi, '', bodytype);
+                if(cinObj.sud) {
+                    _this.response_ws(connection, 2001, '', conf.ae.id, rqi, '', bodytype);
+                }
+                else {
+                    for (var i = 0; i < conf.sub.length; i++) {
+                        if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length - 1] === path_arr[path_arr.length - 2]) {
+                            if (conf.sub[i].name === path_arr[path_arr.length - 1]) {
+                                _this.response_ws(connection, 2001, '', conf.ae.id, rqi, '', bodytype);
 
-                            //console.log((cinObj.con != null ? cinObj.con : cinObj.content));
-                            console.log('ws ' + bodytype + ' notification <----');
+                                //console.log((cinObj.con != null ? cinObj.con : cinObj.content));
+                                console.log('ws ' + bodytype + ' notification <----');
 
 
-                            console.log('ws response - 2001 ---->');
+                                console.log('ws response - 2001 ---->');
 
-                            if (path_arr[path_arr.length - 2] === 'cnt-cam') {
-                                tas.send_tweet(cinObj);
-                            }
-                            else {
-                                tas.noti(path_arr, cinObj);
+                                if (path_arr[path_arr.length - 2] === 'cnt-cam') {
+                                    tas.send_tweet(cinObj);
+                                }
+                                else {
+                                    tas.noti(path_arr, cinObj);
+                                }
                             }
                         }
                     }
                 }
             }
+
         });
     }
     else {
@@ -196,23 +207,29 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj) {
 
         _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
             if(cinObj) {
-                for (var i = 0; i < conf.sub.length; i++) {
-                    if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length-1] === path_arr[path_arr.length-2]) {
-                        if (conf.sub[i].name === path_arr[path_arr.length-1]) {
-                            console.log('mqtt ' + bodytype + ' notification <----');
+                if(cinObj.sud) {
+                    var resp_topic = '/oneM2M/resp/' + topic_arr[3] + '/' + topic_arr[4] + '/' + topic_arr[5];
+                    _this.response_mqtt(resp_topic, 2001, '', conf.ae.id, rqi, '', topic_arr[5]);
+                }
+                else {
+                    for (var i = 0; i < conf.sub.length; i++) {
+                        if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length - 1] === path_arr[path_arr.length - 2]) {
+                            if (conf.sub[i].name === path_arr[path_arr.length - 1]) {
+                                console.log('mqtt ' + bodytype + ' notification <----');
 
-                            var resp_topic = '/oneM2M/resp/' + topic_arr[3] + '/' + topic_arr[4] + '/' + topic_arr[5];
-                            _this.response_mqtt(resp_topic, 2001, '', conf.ae.id, rqi, '', topic_arr[5]);
+                                resp_topic = '/oneM2M/resp/' + topic_arr[3] + '/' + topic_arr[4] + '/' + topic_arr[5];
+                                _this.response_mqtt(resp_topic, 2001, '', conf.ae.id, rqi, '', topic_arr[5]);
 
-                            console.log('mqtt response - 2001 ---->');
+                                console.log('mqtt response - 2001 ---->');
 
-                            if (path_arr[path_arr.length - 2] === 'cnt-cam') {
-                                tas.send_tweet(cinObj);
+                                if (path_arr[path_arr.length - 2] === 'cnt-cam') {
+                                    tas.send_tweet(cinObj);
+                                }
+                                else {
+                                    tas.noti(path_arr, cinObj);
+                                }
+                                break;
                             }
-                            else {
-                                tas.noti(path_arr, cinObj);
-                            }
-                            break;
                         }
                     }
                 }
@@ -234,21 +251,28 @@ exports.http_noti_action = function (rqi, pc, bodytype, response) {
 
     _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
         if (cinObj) {
-            for (var i = 0; i < conf.sub.length; i++) {
-                if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length - 1] === path_arr[path_arr.length - 2]) {
-                    if (conf.sub[i].name === path_arr[path_arr.length - 1]) {
-                        response.setHeader('X-M2M-RSC', '2001');
-                        response.setHeader('X-M2M-RI', rqi);
-                        response.status(201).end('<h1>success to receive notification</h1>');
+            if(cinObj.sud) {
+                response.setHeader('X-M2M-RSC', '2001');
+                response.setHeader('X-M2M-RI', rqi);
+                response.status(201).end('<h1>success to receive notification</h1>');
+            }
+            else {
+                for (var i = 0; i < conf.sub.length; i++) {
+                    if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length - 1] === path_arr[path_arr.length - 2]) {
+                        if (conf.sub[i].name === path_arr[path_arr.length - 1]) {
+                            response.setHeader('X-M2M-RSC', '2001');
+                            response.setHeader('X-M2M-RI', rqi);
+                            response.status(201).end('<h1>success to receive notification</h1>');
 
-                        //console.log((cinObj.con != null ? cinObj.con : cinObj.content));
-                        console.log('http ' + bodytype + ' notification <----');
+                            //console.log((cinObj.con != null ? cinObj.con : cinObj.content));
+                            console.log('http ' + bodytype + ' notification <----');
 
-                        if (path_arr[path_arr.length - 2] === 'cnt-cam') {
-                            tas.send_tweet(cinObj);
-                        }
-                        else {
-                            tas.noti(path_arr, cinObj);
+                            if (path_arr[path_arr.length - 2] === 'cnt-cam') {
+                                tas.send_tweet(cinObj);
+                            }
+                            else {
+                                tas.noti(path_arr, cinObj);
+                            }
                         }
                     }
                 }
@@ -267,20 +291,26 @@ exports.coap_noti_action = function (rqi, pc, bodytype, response) {
 
     _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
         if (cinObj) {
-            for (var i = 0; i < conf.sub.length; i++) {
-                if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length - 1] === path_arr[path_arr.length - 2]) {
-                    if (conf.sub[i].name === path_arr[path_arr.length - 1]) {
-                        response.code = '2.01';
-                        response.end('<h1>success to receive notification</h1>');
+            if(cinObj.sud) {
+                response.code = '2.01';
+                response.end('<h1>success to receive notification</h1>');
+            }
+            else {
+                for (var i = 0; i < conf.sub.length; i++) {
+                    if (conf.sub[i].parent.split('/')[conf.sub[i].parent.split('/').length - 1] === path_arr[path_arr.length - 2]) {
+                        if (conf.sub[i].name === path_arr[path_arr.length - 1]) {
+                            response.code = '2.01';
+                            response.end('<h1>success to receive notification</h1>');
 
-                        //console.log((cinObj.con != null ? cinObj.con : cinObj.content));
-                        console.log('coap ' + bodytype + ' notification <----');
+                            //console.log((cinObj.con != null ? cinObj.con : cinObj.content));
+                            console.log('coap ' + bodytype + ' notification <----');
 
-                        if (path_arr[path_arr.length - 2] === 'cnt-cam') {
-                            tas.send_tweet(cinObj);
-                        }
-                        else {
-                            tas.noti(path_arr, cinObj);
+                            if (path_arr[path_arr.length - 2] === 'cnt-cam') {
+                                tas.send_tweet(cinObj);
+                            }
+                            else {
+                                tas.noti(path_arr, cinObj);
+                            }
                         }
                     }
                 }
