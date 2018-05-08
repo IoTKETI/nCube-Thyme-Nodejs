@@ -19,79 +19,66 @@ var xml2js = require('xml2js');
 var url = require('url');
 var cbor = require('cbor');
 
-if(conf.cse.id.split('/')[1] == '') {
-    var cseid = conf.cse.id.split('/')[0];
-}
-else {
-    cseid = conf.cse.id.split('/')[1];
-}
+global.req_topic = '/oneM2M/req/'+conf.ae.id+conf.cse.id+'/'+conf.ae.bodytype;
 
-var reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/'+cseid+'/#';
-global.req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
-var resp_topic = '/oneM2M/resp/'+conf.ae.id+'/'+cseid+'/#';
-var noti_topic = '/oneM2M/req/'+cseid+'/'+conf.ae.id+'/#';
+var reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/+/#';
+var resp_topic = '/oneM2M/resp/'+conf.ae.id+'/+/#';
+var noti_topic = '/oneM2M/req/+/'+conf.ae.id+'/#';
 
 global.sh_adn = require('./mqtt_adn');
 var noti = require('./noti');
 var tas = require('./thyme_tas');
 
-function mqtt_connect(brokerip) {
-    if(mqtt_client == null) {
-        if (conf.usesecure === 'disable') {
-            if (conf.usesecure === 'disable') {
-                var connectOptions = {
-                    host: brokerip,
-                    port: conf.cse.mqttport,
-    //              username: 'keti',
-    //              password: 'keti123',
-                    protocol: "mqtt",
-                    keepalive: 10,
-    //              clientId: serverUID,
-                    protocolId: "MQTT",
-                    protocolVersion: 4,
-                    clean: true,
-                    reconnectPeriod: 2000,
-                    connectTimeout: 2000,
-                    rejectUnauthorized: false
-                };
-            }
-            else {
-                connectOptions = {
-                    host: brokerip,
-                    port: conf.cse.mqttport,
-                    protocol: "mqtts",
-                    keepalive: 10,
-    //              clientId: serverUID,
-                    protocolId: "MQTT",
-                    protocolVersion: 4,
-                    clean: true,
-                    reconnectPeriod: 2000,
-                    connectTimeout: 2000,
-                    key: fs.readFileSync("./server-key.pem"),
-                    cert: fs.readFileSync("./server-crt.pem"),
-                    rejectUnauthorized: false
-                };
-            }
-
-            mqtt_client = mqtt.connect(connectOptions);
-        }
-    }
-
-
-    mqtt_client.on('connect', function () {
-        mqtt_client.subscribe(reg_resp_topic);
-        mqtt_client.subscribe(resp_topic);
-        mqtt_client.subscribe(noti_topic);
-
-        console.log('subscribe reg_resp_topic as ' + reg_resp_topic);
-        console.log('subscribe resp_topic as ' + resp_topic);
-        console.log('subscribe noti_topic as ' + noti_topic);
-
-        sh_state = 'crtae';
-    });
-
-    mqtt_client.on('message', mqtt_message_handler);
+if (conf.usesecure === 'disable') {
+    var connectOptions = {
+        host: conf.cse.host,
+        port: conf.cse.mqttport,
+//              username: 'keti',
+//              password: 'keti123',
+        protocol: "mqtt",
+        keepalive: 10,
+//              clientId: serverUID,
+        protocolId: "MQTT",
+        protocolVersion: 4,
+        clean: true,
+        reconnectPeriod: 2000,
+        connectTimeout: 2000,
+        rejectUnauthorized: false
+    };
 }
+else {
+    connectOptions = {
+        host: brokerip,
+        port: conf.cse.mqttport,
+        protocol: "mqtts",
+        keepalive: 10,
+//              clientId: serverUID,
+        protocolId: "MQTT",
+        protocolVersion: 4,
+        clean: true,
+        reconnectPeriod: 2000,
+        connectTimeout: 2000,
+        key: fs.readFileSync("./server-key.pem"),
+        cert: fs.readFileSync("./server-crt.pem"),
+        rejectUnauthorized: false
+    };
+}
+
+mqtt_client = mqtt.connect(connectOptions);
+
+mqtt_client.on('connect', function () {
+    mqtt_client.subscribe(reg_resp_topic);
+    mqtt_client.subscribe(resp_topic);
+    mqtt_client.subscribe(noti_topic);
+
+    console.log('subscribe reg_resp_topic as ' + reg_resp_topic);
+    console.log('subscribe resp_topic as ' + resp_topic);
+    console.log('subscribe noti_topic as ' + noti_topic);
+
+    sh_state = 'crtae';
+});
+
+mqtt_client.on('message', mqtt_message_handler);
 
 function mqtt_callback(jsonObj) {
     for (var i = 0; i < resp_mqtt_ri_arr.length; i++) {
@@ -110,14 +97,15 @@ function mqtt_callback(jsonObj) {
 
 function mqtt_message_handler(topic, message) {
     var topic_arr = topic.split("/");
+    var bodytype = conf.ae.bodytype;
     if(topic_arr[5] != null) {
-        var bodytype = (topic_arr[5] == 'xml') ? topic_arr[5] : ((topic_arr[5] == 'json') ? topic_arr[5] : ((topic_arr[5] == 'cbor') ? topic_arr[5] : 'json'));
+        bodytype = (topic_arr[5] === 'xml') ? topic_arr[5] : ((topic_arr[5] === 'json') ? topic_arr[5] : ((topic_arr[5] === 'cbor') ? topic_arr[5] : 'json'));
     }
 
     console.log(message.toString());
 
     if(topic_arr[1] == 'oneM2M' && (topic_arr[2] == 'resp' || topic_arr[2] == 'reg_resp') && topic_arr[3].replace(':', '/') == conf.ae.id) {
-        if(bodytype == 'xml') {
+        if(bodytype === 'xml') {
             var parser = new xml2js.Parser({explicitArray: false});
             parser.parseString(message.toString(), function (err, jsonObj) {
                 if (err) {
@@ -128,7 +116,7 @@ function mqtt_message_handler(topic, message) {
                         mqtt_callback(jsonObj);
                     }
                     else {
-                        NOPRINT == 'true' ? NOPRINT = 'true' : console.log('[pxymqtt-resp] message is not resp');
+                        NOPRINT==='true'?NOPRINT='true':console.log('[pxymqtt-resp] message is not resp');
                         noti.response_mqtt(topic_arr[4], 4000, '', conf.ae.id, rqi, '<h1>fail to parsing mqtt message</h1>');
                     }
                 }
@@ -216,10 +204,10 @@ function ae_response_action(status, result) {
 
     //fs.writeFileSync('aei.json', JSON.stringify(conf.ae.id, null, 4), 'utf8');
 
-    reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/'+cseid+'/#';
-    req_topic = '/oneM2M/req/'+conf.ae.id+'/'+cseid+'/'+conf.ae.bodytype;
-    resp_topic = '/oneM2M/resp/'+conf.ae.id+'/'+cseid+'/#';
-    noti_topic = '/oneM2M/req/'+cseid+'/'+conf.ae.id+'/#';
+    reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/+/#';
+    req_topic = '/oneM2M/req/'+conf.ae.id+'/+/'+conf.ae.bodytype;
+    resp_topic = '/oneM2M/resp/'+conf.ae.id+'/+/#';
+    noti_topic = '/oneM2M/req/+/'+conf.ae.id+'/#';
 
     mqtt_client.subscribe(reg_resp_topic);
     mqtt_client.subscribe(resp_topic);
@@ -358,10 +346,6 @@ function mqtt_watchdog() {
                 sh_state = 'crtci';
 
                 tas.ready();
-
-                // var _ae = {};
-                // _ae.id = conf.ae.id;
-                // fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
             }
         });
     }

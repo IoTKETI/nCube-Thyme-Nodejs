@@ -67,22 +67,15 @@ function ready_for_notification() {
     }
 
     if(MQTT_SUBSCRIPTION_ENABLE == 1) {
-        if(conf.cse.id.split('/')[1] === '') {
-            var cseid = conf.cse.id.split('/')[0];
-        }
-        else {
-            cseid = conf.cse.id.split('/')[1];
-        }
-
         for(var i = 0; i < conf.sub.length; i++) {
             if (conf.sub[i].name != null) {
                 if(url.parse(conf.sub[i].nu).protocol === 'mqtt:') {
                     if (url.parse(conf.sub[i]['nu']).hostname === 'autoset') {
                         conf.sub[i]['nu'] = 'mqtt://' + conf.cse.host + '/' + conf.ae.id;
-                        noti_topic = util.format('/oneM2M/req/%s/%s/#', cseid, conf.ae.id);
+                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.id);
                     }
                     else if (url.parse(conf.sub[i]['nu']).hostname === conf.cse.host) {
-                        noti_topic = util.format('/oneM2M/req/%s/%s/#', cseid, conf.ae.id);
+                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.id);
                     }
                     else {
                         noti_topic = util.format('%s', url.parse(conf.sub[i].nu).pathname);
