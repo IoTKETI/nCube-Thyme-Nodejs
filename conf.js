@@ -71,9 +71,8 @@ count = 0;
 sub_arr[count] = {};
 sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
 sub_arr[count].name = 'sub';
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=xml'; // mqtt
 //sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9&ct=' + ae.bodytype; // mqtt
+sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype; // mqtt
 // --------
 
 /*// --------
