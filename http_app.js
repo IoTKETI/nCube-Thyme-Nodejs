@@ -55,8 +55,8 @@ for(var i = 0; i < conf.sub.length; i++) {
             MQTT_SUBSCRIPTION_ENABLE = 1;
         }
         else {
-            console.log('notification uri of subscription is not supported');
-            process.exit();
+            //console.log('notification uri of subscription is not supported');
+            //process.exit();
         }
     }
 }

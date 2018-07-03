@@ -56,9 +56,9 @@ cnt_arr[count++].name = 'temp';
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
 cnt_arr[count++].name = 'tvoc';
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'timer';
+// cnt_arr[count] = {};
+// cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+// cnt_arr[count++].name = 'timer';
 
 // build sub
 count = 0;
@@ -71,8 +71,9 @@ count = 0;
 sub_arr[count] = {};
 sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
 sub_arr[count].name = 'sub';
-//sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
 sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype; // mqtt
+//sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
+//sub_arr[count++].nu = 'Mobius/'+ae.name; // mqtt
 // --------
 
 /*// --------

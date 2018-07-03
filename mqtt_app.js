@@ -278,7 +278,6 @@ function create_sub_all(count, callback) {
 
 function mqtt_watchdog() {
     if(sh_state == 'connect') {
-        mqtt_connect(conf.cse.host);
     }
     else if(sh_state == 'crtae') {
         console.log('[sh_state] : ' + sh_state);

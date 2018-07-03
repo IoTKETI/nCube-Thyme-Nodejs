@@ -70,7 +70,10 @@ function http_request(path, method, ty, bodyString, callback) {
                 var parser = new xml2js.Parser({explicitArray: false});
                 parser.parseString(res_body, function (err, jsonObj) {
                     if (err) {
-                        console.log('[http_adn] xml2js parser error]');
+                        console.log('[http_adn] xml parse error]');
+                        var jsonObj = {};
+                        jsonObj.dbg = res_body;
+                        callback(res, jsonObj);
                     }
                     else {
                         callback(res, jsonObj);
@@ -80,7 +83,10 @@ function http_request(path, method, ty, bodyString, callback) {
             else if(conf.ae.bodytype == 'cbor') {
                 cbor.decodeFirst(res_body, function(err, jsonObj) {
                     if (err) {
-                        console.log('[http_adn] cbor parser error]');
+                        console.log('[http_adn] cbor parse error]');
+                        var jsonObj = {};
+                        jsonObj.dbg = res_body;
+                        callback(res, jsonObj);
                     }
                     else {
                         callback(res, jsonObj);
@@ -88,8 +94,16 @@ function http_request(path, method, ty, bodyString, callback) {
                 });
             }
             else {
-                var jsonObj = JSON.parse(res_body);
-                callback(res, jsonObj);
+                try {
+                    var jsonObj = JSON.parse(res_body);
+                    callback(res, jsonObj);
+                }
+                catch (e) {
+                    console.log('[http_adn] json parse error]');
+                    var jsonObj = {};
+                    jsonObj.dbg = res_body;
+                    callback(res, jsonObj);
+                }
             }
         });
     });
@@ -138,6 +152,7 @@ exports.crtae = function (parent, rn, api, callback) {
         results_ae['m2m:ae'].rn = rn;
         results_ae['m2m:ae'].rr = true;
         //results_ae['m2m:ae'].acpi = '/mobius-yt/acp1';
+
         bodyString = JSON.stringify(results_ae);
     }
 
@@ -309,7 +324,7 @@ exports.crtsub = function(parent, rn, nu, count, callback) {
 
     http_request(parent, 'post', '23', bodyString, function (res, res_body) {
         console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        console.log(res_body);
+        console.log(JSON.stringify(res_body));
         callback(res.headers['x-m2m-rsc'], res_body, count);
     });
 };

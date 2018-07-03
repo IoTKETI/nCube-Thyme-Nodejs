@@ -55,6 +55,7 @@ exports.crtae = function (callback) {
         delete req_message['m2m:rqp'].pc['m2m:ae'].rn;
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
+        console.log(bodyString);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -95,6 +96,7 @@ exports.rtvae = function (callback) {
         };
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
+        console.log(bodyString);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -153,7 +155,8 @@ exports.crtct = function(count, callback) {
         delete req_message['m2m:rqp'].pc['m2m:cnt'].rn;
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
-
+        console.log(bodyString);
+        
         mqtt_client.publish(req_topic, bodyString);
 
         console.log(req_topic + ' (' + rqi + ' - xml) ---->');
@@ -194,6 +197,7 @@ exports.rtvct = function(count, callback) {
         };
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
+        console.log(bodyString);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -245,6 +249,7 @@ exports.delsub = function(count, callback) {
         };
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
+        console.log(bodyString);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -297,6 +302,7 @@ exports.crtsub = function(count, callback) {
         delete req_message['m2m:rqp'].pc['m2m:sub'].rn;
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
+        console.log(bodyString);
 
         mqtt_client.publish(req_topic, bodyString);
 
@@ -341,6 +347,7 @@ exports.crtci = function(parent, count, content, socket, callback) {
         };
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
+        console.log(bodyString);
 
         mqtt_client.publish(req_topic, bodyString);
 
