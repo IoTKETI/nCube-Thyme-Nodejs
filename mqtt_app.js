@@ -300,7 +300,7 @@ function mqtt_watchdog() {
                 var aeid = res_body['m2m:ae']['aei'];
                 console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
 
-                if(conf.ae.id != aeid) {
+                if(conf.ae.id != aeid && conf.ae.id != ('/'+aeid)) {
                     console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
                 }
                 else {
