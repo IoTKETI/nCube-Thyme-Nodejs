@@ -169,7 +169,7 @@ exports.crtct = function(count, callback) {
     else { // 'json'
         mqtt_client.publish(req_topic, JSON.stringify(req_message['m2m:rqp']));
 
-        console.log(req_topic + ' (json) ---->');
+        console.log(req_topic + ' (json) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
     }
 };
 
@@ -316,7 +316,7 @@ exports.crtsub = function(count, callback) {
     else { // 'json'
         mqtt_client.publish(req_topic, JSON.stringify(req_message['m2m:rqp']));
 
-        console.log(req_topic + ' (json) ---->');
+        console.log(req_topic + ' (json) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
     }
 };
 
@@ -361,7 +361,7 @@ exports.crtci = function(parent, count, content, socket, callback) {
     else { // 'json'
         mqtt_client.publish(req_topic, JSON.stringify(req_message['m2m:rqp']));
 
-        console.log(req_topic + ' (json) ---->');
+        console.log(req_topic + ' (json) ' + JSON.stringify(req_message['m2m:rqp']) + ' ---->');
     }
 };
 

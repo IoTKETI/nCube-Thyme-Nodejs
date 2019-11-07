@@ -231,6 +231,7 @@ exports.crtct = function(parent, rn, count, callback) {
         results_ct['m2m:cnt'].rn = rn;
         results_ct['m2m:cnt'].lbl = [rn];
         bodyString = JSON.stringify(results_ct);
+        console.log(bodyString);
     }
 
     http_request(parent, 'post', '3', bodyString, function (res, res_body) {
@@ -292,7 +293,7 @@ exports.crtsub = function(parent, rn, nu, count, callback) {
     var results_ss = {};
     var bodyString = '';
     if (conf.ae.bodytype === 'xml') {
-        results_ss.enc = {net: [3]};
+        results_ss.enc = {net: [1,2,3,4]};
         results_ss.nu = [nu];
         results_ss.nct = 2;
         results_ss['@'] = {
@@ -306,7 +307,7 @@ exports.crtsub = function(parent, rn, nu, count, callback) {
     else if(conf.ae.bodytype === 'cbor') {
         results_ss['m2m:sub'] = {};
         results_ss['m2m:sub'].rn = rn;
-        results_ss['m2m:sub'].enc = {net: [3]};
+        results_ss['m2m:sub'].enc = {net: [1,2,3,4]};
         results_ss['m2m:sub'].nu = [nu];
         results_ss['m2m:sub'].nct = 2;
         bodyString = cbor.encode(results_ss).toString('hex');
@@ -315,11 +316,13 @@ exports.crtsub = function(parent, rn, nu, count, callback) {
     else {
         results_ss['m2m:sub'] = {};
         results_ss['m2m:sub'].rn = rn;
-        results_ss['m2m:sub'].enc = {net: [3]};
+        results_ss['m2m:sub'].enc = {net: [1,2,3,4]};
         results_ss['m2m:sub'].nu = [nu];
         results_ss['m2m:sub'].nct = 2;
+        //results_ss['m2m:sub'].exc = 0;
 
         bodyString = JSON.stringify(results_ss);
+        console.log(bodyString);
     }
 
     http_request(parent, 'post', '23', bodyString, function (res, res_body) {

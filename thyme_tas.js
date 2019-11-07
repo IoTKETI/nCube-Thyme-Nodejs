@@ -24,24 +24,26 @@ exports.buffer = tas_buffer;
 
 
 var t_count = 0;
-function timer_upload_action() {
+function timer_upload_action(num, content) {
     if (sh_state == 'crtci') {
-        for (var j = 0; j < conf.cnt.length; j++) {
-            if (conf.cnt[j].name == 'timer') {
-                //var content = JSON.stringify({value: 'TAS' + t_count++});
-                var content = parseInt(Math.random()*100).toString();
-                console.log('thyme cnt-timer ' + content + ' ---->');
-                var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
-                sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
-                    console.log('x-m2m-rsc : ' + status + ' <----');
-                });
-                break;
-            }
-        }
+        var parent = conf.cnt[num].parent + '/' + conf.cnt[num].name;
+        sh_adn.crtci(parent, num, content, this, function (status, res_body, to, socket) {
+            console.log('x-m2m-rsc : ' + status + ' <----');
+        });
+
+        setTimeout(timer_upload, 0);
+    }
+    else {
+        setTimeout(timer_upload, 1000);
     }
 }
 
-wdt.set_wdt(require('shortid').generate(), 10, timer_upload_action);
+function timer_upload() {
+    var gap = parseInt(100 + Math.random() * 100);
+    var num = parseInt(Math.random() * 2.9);
+    var content = JSON.stringify({value: 'TAS' + t_count++});
+    setTimeout(timer_upload_action, gap, num, content);
+}
 
 var _server = null;
 exports.ready = function tas_ready () {
@@ -65,6 +67,10 @@ exports.ready = function tas_ready () {
         _server.listen(conf.ae.tasport, function() {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tasport);
         });
+
+        if(conf.sim == 'enable') {
+            setTimeout(timer_upload, 1000);
+        }
     }
 };
 

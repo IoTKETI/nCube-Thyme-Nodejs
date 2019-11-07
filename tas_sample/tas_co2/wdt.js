@@ -26,7 +26,7 @@ var wdt_param3_q = {};
 
 setInterval(function () {
     wdt.emit('tas_watchdog');
-}, 1000);
+}, 1);
 
 wdt.on('tas_watchdog', function() {
     for (var id in wdt_value_q) {

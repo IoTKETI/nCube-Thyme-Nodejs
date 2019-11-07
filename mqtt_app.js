@@ -205,9 +205,9 @@ function ae_response_action(status, result) {
     //fs.writeFileSync('aei.json', JSON.stringify(conf.ae.id, null, 4), 'utf8');
 
     reg_resp_topic = '/oneM2M/reg_resp/'+conf.ae.id+'/+/#';
-    req_topic = '/oneM2M/req/'+conf.ae.id+'/+/'+conf.ae.bodytype;
+    req_topic = '/oneM2M/req/'+conf.ae.id+conf.cse.id+'/'+conf.ae.bodytype;
     resp_topic = '/oneM2M/resp/'+conf.ae.id+'/+/#';
-    noti_topic = '/oneM2M/req/+/'+conf.ae.id+'/#';
+    noti_topic = '/oneM2M/req'+conf.cse.id+'/'+conf.ae.id+'/#';
 
     mqtt_client.subscribe(reg_resp_topic);
     mqtt_client.subscribe(resp_topic);

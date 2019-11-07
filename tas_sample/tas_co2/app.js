@@ -13,7 +13,7 @@ var xml2js = require('xml2js');
 var wdt = require('./wdt');
 //var sh_serial = require('./serial');
 
-var serialport = require('serialport');
+var SerialPort = require('serialport');
 
 var usecomport = '';
 var usebaudrate = '';
@@ -148,7 +148,6 @@ function on_receive(data) {
 }
 
 
-var SerialPort = null;
 var myPort = null;
 function tas_watchdog() {
     if(tas_state == 'init') {
@@ -173,13 +172,13 @@ function tas_watchdog() {
         }
     }
     else if(tas_state == 'init_serial') {
-    	SerialPort = serialport.SerialPort;
-    	
-        serialport.list(function (err, ports) {
-            ports.forEach(function (port) {
-                console.log(port.comName);
-            });
-        });
+    	// SerialPort = serialport.SerialPort;
+    	//
+        // serialport.list(function (err, ports) {
+        //     ports.forEach(function (port) {
+        //         console.log(port.comName);
+        //     });
+        // });
 
         myPort = new SerialPort(usecomport, {
             baudRate : parseInt(usebaudrate, 10),
