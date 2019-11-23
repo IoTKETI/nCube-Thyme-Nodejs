@@ -57,7 +57,7 @@ function http_request(path, method, ty, bodyString, callback) {
 
     var res_body = '';
     var req = http.request(options, function (res) {
-        //console.log('[crtae response : ' + res.statusCode);
+        console.log(res.headers['x-m2m-rsc']);
 
         //res.setEncoding('utf8');
 
@@ -73,10 +73,10 @@ function http_request(path, method, ty, bodyString, callback) {
                         console.log('[http_adn] xml parse error]');
                         var jsonObj = {};
                         jsonObj.dbg = res_body;
-                        callback(res, jsonObj);
+                        callback(9999, jsonObj);
                     }
                     else {
-                        callback(res, jsonObj);
+                        callback(res.headers['x-m2m-rsc'], jsonObj);
                     }
                 });
             }
@@ -84,25 +84,25 @@ function http_request(path, method, ty, bodyString, callback) {
                 cbor.decodeFirst(res_body, function(err, jsonObj) {
                     if (err) {
                         console.log('[http_adn] cbor parse error]');
-                        var jsonObj = {};
+                        jsonObj = {};
                         jsonObj.dbg = res_body;
-                        callback(res, jsonObj);
+                        callback(9999, jsonObj);
                     }
                     else {
-                        callback(res, jsonObj);
+                        callback(res.headers['x-m2m-rsc'], jsonObj);
                     }
                 });
             }
             else {
                 try {
                     var jsonObj = JSON.parse(res_body);
-                    callback(res, jsonObj);
+                    callback(res.headers['x-m2m-rsc'], jsonObj);
                 }
                 catch (e) {
                     console.log('[http_adn] json parse error]');
-                    var jsonObj = {};
+                    jsonObj = {};
                     jsonObj.dbg = res_body;
-                    callback(res, jsonObj);
+                    callback(9999, jsonObj);
                 }
             }
         });
@@ -110,10 +110,13 @@ function http_request(path, method, ty, bodyString, callback) {
 
     req.on('error', function (e) {
         console.log('problem with request: ' + e.message);
+
+        callback(9999, null);
     });
 
     //console.log(bodyString);
 
+    options = null;
     console.log(path);
 
     req.write(bodyString);
@@ -156,14 +159,24 @@ exports.crtae = function (parent, rn, api, callback) {
         bodyString = JSON.stringify(results_ae);
     }
 
-    http_request(parent, 'post', '2', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(parent, 'post', '2', bodyString, function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body);
+        }
     });
 };
 
 exports.rtvae = function (target, callback) {
-    http_request(target, 'get', '', '', function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(target, 'get', '', '', function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body);
+        }
     });
 };
 
@@ -192,15 +205,25 @@ exports.udtae = function (target, callback) {
         bodyString = JSON.stringify(results_ae);
     }
 
-    http_request(target, 'put', '', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(target, 'put', '', bodyString, function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body);
+        }
     });
 };
 
 
 exports.delae = function (target, callback) {
-    http_request(target, 'delete', '', '', function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(target, 'delete', '', '', function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body);
+        }
     });
 };
 
@@ -234,19 +257,25 @@ exports.crtct = function(parent, rn, count, callback) {
         console.log(bodyString);
     }
 
-    http_request(parent, 'post', '3', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        console.log(res_body);
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(parent, 'post', '3', bodyString, function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body, count);
+        }
     });
 };
 
 
 exports.rtvct = function(target, count, callback) {
-    http_request(target, 'get', '', '', function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        console.log(res_body);
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(target, 'get', '', '', function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body, count);
+        }
     });
 };
 
@@ -275,17 +304,25 @@ exports.udtct = function(target, lbl, count, callback) {
         bodyString = JSON.stringify(results_ct);
     }
 
-    http_request(target, 'put', '', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(target, 'put', '', bodyString, function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body, count);
+        }
     });
 };
 
 
 exports.delct = function(target, count, callback) {
-    http_request(target, 'delete', '', '', function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(target, 'delete', '', '', function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body, count);
+        }
     });
 };
 
@@ -325,23 +362,29 @@ exports.crtsub = function(parent, rn, nu, count, callback) {
         console.log(bodyString);
     }
 
-    http_request(parent, 'post', '23', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        console.log(JSON.stringify(res_body));
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(parent, 'post', '23', bodyString, function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body, count);
+        }
     });
 };
 
 exports.delsub = function(target, count, callback) {
-    http_request(target, 'delete', '', '', function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        console.log(res_body);
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(target, 'delete', '', '', function (rsc, res_body) {
+        if(rsc == 9999) {
+            callback(rsc, res_body);
+        }
+        else {
+            callback(rsc, res_body, count);
+        }
     });
 };
 
 
-exports.crtci = function(parent, count, content, socket, callback) {
+exports.crtci = function(parent, count, content, callback) {
     var results_ci = {};
     var bodyString = '';
     if(conf.ae.bodytype === 'xml') {
@@ -367,8 +410,16 @@ exports.crtci = function(parent, count, content, socket, callback) {
         bodyString = JSON.stringify(results_ci);
     }
 
-    http_request(parent, 'post', '4', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body, parent, socket);
+    delete results_ci;
+    results_ci = null;
+    http_request(parent, 'post', '4', bodyString, function (rsc, res_body) {
+        res_body = null;
+        if(rsc == 9999) {
+            callback(rsc);
+        }
+        else {
+            callback(rsc);
+        }
     });
 };
 

@@ -358,6 +358,9 @@ function http_watchdog() {
 
                 setTimeout(http_watchdog, 100);
             }
+            else {
+                setTimeout(http_watchdog, 1000);
+            }
         });
     }
     else if (sh_state === 'rtvae') {
@@ -654,3 +657,23 @@ app.use(function(request, response, next) {
     });
 });
 */
+
+function scheduleGc() {
+    if (!global.gc) {
+        console.log('Garbage collection is not exposed');
+        return;
+    }
+
+    // schedule next gc within a random interval (e.g. 15-45 minutes)
+    // tweak this based on your app's memory usage
+    var nextMinutes = Math.random() * 30 + 15;
+
+    setTimeout(function(){
+        global.gc();
+        console.log('---------------------------------------------------------------------------Manual gc', process.memoryUsage());
+        scheduleGc();
+    }, nextMinutes * 60 * 1000);
+}
+
+// call this in the startup script of your app (once per process)
+scheduleGc();

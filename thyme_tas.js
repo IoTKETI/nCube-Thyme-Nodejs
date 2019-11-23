@@ -22,27 +22,34 @@ exports.socket_arr = socket_arr;
 var tas_buffer = {};
 exports.buffer = tas_buffer;
 
+var t_count = [];
+t_count.push(0);
+t_count.push(0);
+t_count.push(0);
 
-var t_count = 0;
-function timer_upload_action(num, content) {
+var MAX_SEND = 10000;
+
+function test_timer_upload_action() {
     if (sh_state == 'crtci') {
-        var parent = conf.cnt[num].parent + '/' + conf.cnt[num].name;
-        sh_adn.crtci(parent, num, content, this, function (status, res_body, to, socket) {
-            console.log('x-m2m-rsc : ' + status + ' <----');
-        });
+        var num = parseInt(Math.random() * 2.9);
+        if(t_count[num] < MAX_SEND ) {
+            var content = JSON.stringify({value: 'TAS' + t_count[num]++});
+            var parent = conf.cnt[num].parent + '/' + conf.cnt[num].name;
+            sh_adn.crtci(parent, num, content, function (status) {
+                console.log('x-m2m-rsc : ' + status + ' <----');
+            });
+        }
 
-        setTimeout(timer_upload, 0);
+        var gap = parseInt(10 + Math.random() * 30);
+        setTimeout(function () {
+            test_timer_upload_action();
+        }, gap);
     }
     else {
-        setTimeout(timer_upload, 1000);
+        setTimeout(function () {
+            test_timer_upload_action();
+        }, 1000);
     }
-}
-
-function timer_upload() {
-    var gap = parseInt(100 + Math.random() * 100);
-    var num = parseInt(Math.random() * 2.9);
-    var content = JSON.stringify({value: 'TAS' + t_count++});
-    setTimeout(timer_upload_action, gap, num, content);
 }
 
 var _server = null;
@@ -69,7 +76,7 @@ exports.ready = function tas_ready () {
         });
 
         if(conf.sim == 'enable') {
-            setTimeout(timer_upload, 1000);
+            setTimeout(test_timer_upload_action, 1000);
         }
     }
 };
@@ -100,7 +107,7 @@ function tas_handler (data) {
                         if (conf.cnt[j].name == ctname) {
                             //console.log(line);
                             var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
-                            sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
+                            sh_adn.crtci(parent, j, content, function (status, res_body) {
                                 try {
                                     var to_arr = to.split('/');
                                     var ctname = to_arr[to_arr.length - 1];
@@ -193,6 +200,8 @@ exports.noti = function(path_arr, cinObj) {
     var cin = {};
     cin.ctname = path_arr[path_arr.length-2];
     cin.con = (cinObj.con != null) ? cinObj.con : cinObj.content;
+    delete cinObj;
+    cinObj = null;
 
     if(cin.con == '') {
         console.log('---- is not cin message');
@@ -204,5 +213,7 @@ exports.noti = function(path_arr, cinObj) {
         if (socket_arr[path_arr[path_arr.length-2]] != null) {
             socket_arr[path_arr[path_arr.length-2]].write(JSON.stringify(cin) + '<EOF>');
         }
+        delete cin;
+        cin = null;
     }
 };
