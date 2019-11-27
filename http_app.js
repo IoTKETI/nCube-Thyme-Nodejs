@@ -107,7 +107,7 @@ function create_cnt_all(count, callback) {
         if(conf.cnt.hasOwnProperty(count)) {
             var parent = conf.cnt[count].parent;
             var rn = conf.cnt[count].name;
-            sh_adn.crtct(parent, rn, count, function (rsc, res_body, count) {
+            sh_adn.crtct(parent, rn, count, function (rsc, res_body) {
                 if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
                     create_cnt_all(++count, function (status, count) {
                         callback(status, count);
@@ -398,15 +398,11 @@ function http_watchdog() {
                 setTimeout(http_watchdog, 1000);
             }
             else {
-                request_count = ++count;
+                sh_state = 'delsub';
+                request_count = 0;
                 return_count = 0;
-                if (conf.cnt.length <= count) {
-                    sh_state = 'delsub';
-                    request_count = 0;
-                    return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
-                }
+                setTimeout(http_watchdog, 100);
             }
         });
     }
@@ -417,15 +413,11 @@ function http_watchdog() {
                 setTimeout(http_watchdog, 1000);
             }
             else {
-                request_count = ++count;
+                sh_state = 'crtsub';
+                request_count = 0;
                 return_count = 0;
-                if (conf.sub.length <= count) {
-                    sh_state = 'crtsub';
-                    request_count = 0;
-                    return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
-                }
+                setTimeout(http_watchdog, 100);
             }
         });
     }
@@ -436,17 +428,13 @@ function http_watchdog() {
                 setTimeout(http_watchdog, 1000);
             }
             else {
-                request_count = ++count;
-                return_count = 0;
-                if (conf.sub.length <= count) {
-                    sh_state = 'crtci';
+                sh_state = 'crtci';
 
-                    ready_for_notification();
+                ready_for_notification();
 
-                    tas.ready();
+                tas.ready();
 
-                    setTimeout(http_watchdog, 100);
-                }
+                setTimeout(http_watchdog, 100);
             }
         });
     }

@@ -40,13 +40,15 @@ exports.parse_sgn = function (rqi, pc, callback) {
                     if (sgnObj.nev.rep['m2m:cin']) {
                         sgnObj.nev.rep.cin = sgnObj.nev.rep['m2m:cin'];
                         delete sgnObj.nev.rep['m2m:cin'];
-                    }
 
-                    if (sgnObj.nev.rep.cin) {
                         cinObj = sgnObj.nev.rep.cin;
                     }
+                    else if (sgnObj.nev.rep['m2m:sub']) {
+                        console.log('[mqtt_noti_action] m2m:sub is');
+                        cinObj = null;
+                    }
                     else {
-                        console.log('[mqtt_noti_action] m2m:cin is none');
+                        console.log('[mqtt_noti_action] m2m:cin or m2m:sub is none');
                         cinObj = null;
                     }
                 }

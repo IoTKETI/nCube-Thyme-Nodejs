@@ -134,7 +134,7 @@ exports.crtae = function (parent, rn, api, callback) {
         results_ae['@'] = {
             "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
-            "rn" : conf.ae.name
+            "rn" : rn
         };
 
         bodyString = js2xmlparser.parse("m2m:ae", results_ae);
@@ -258,12 +258,7 @@ exports.crtct = function(parent, rn, count, callback) {
     }
 
     http_request(parent, 'post', '3', bodyString, function (rsc, res_body) {
-        if(rsc == 9999) {
-            callback(rsc, res_body);
-        }
-        else {
-            callback(rsc, res_body, count);
-        }
+        callback(rsc, res_body);
     });
 };
 

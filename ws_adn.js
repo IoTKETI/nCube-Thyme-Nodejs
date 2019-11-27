@@ -315,7 +315,6 @@ exports.crtci = function(parent, count, content, socket, callback) {
 
     resp_mqtt_ri_arr.push(rqi);
     resp_mqtt_path_arr[rqi] = conf.cnt[count].parent + '/' + conf.cnt[count].name;
-    socket_q[rqi] = socket;
 
     var req_message = {};
     req_message['m2m:rqp'] = {};

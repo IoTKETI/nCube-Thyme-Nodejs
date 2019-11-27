@@ -52,9 +52,7 @@ var tas = require('./thyme_tas');
 function ws_callback(jsonObj) {
     for (var i = 0; i < resp_mqtt_ri_arr.length; i++) {
         if (resp_mqtt_ri_arr[i] == jsonObj['m2m:rsp'].rqi) {
-            var socket = socket_q[resp_mqtt_ri_arr[i]];
-            var to = resp_mqtt_path_arr[resp_mqtt_ri_arr[i]];
-            console.log(to);
+            console.log(resp_mqtt_path_arr[resp_mqtt_ri_arr[i]]);
             callback_q[resp_mqtt_ri_arr[i]](jsonObj['m2m:rsp'].rsc, jsonObj['m2m:rsp'].pc, to, socket);
             delete callback_q[resp_mqtt_ri_arr[i]];
             delete resp_mqtt_path_arr[resp_mqtt_ri_arr[i]];

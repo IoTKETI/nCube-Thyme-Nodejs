@@ -83,13 +83,12 @@ mqtt_client.on('message', mqtt_message_handler);
 function mqtt_callback(jsonObj) {
     for (var i = 0; i < resp_mqtt_ri_arr.length; i++) {
         if (resp_mqtt_ri_arr[i] == jsonObj['m2m:rsp'].rqi) {
-            var socket = socket_q[resp_mqtt_ri_arr[i]];
-            var to = resp_mqtt_path_arr[resp_mqtt_ri_arr[i]];
-            console.log(to);
-            callback_q[resp_mqtt_ri_arr[i]](jsonObj['m2m:rsp'].rsc, jsonObj['m2m:rsp'].pc, to, socket);
+            console.log(resp_mqtt_path_arr[resp_mqtt_ri_arr[i]]);
+            callback_q[resp_mqtt_ri_arr[i]](jsonObj['m2m:rsp'].rsc, jsonObj['m2m:rsp'].pc);
             delete callback_q[resp_mqtt_ri_arr[i]];
             delete resp_mqtt_path_arr[resp_mqtt_ri_arr[i]];
             resp_mqtt_ri_arr.splice(i, 1);
+            --i;
             break;
         }
     }
@@ -214,88 +213,115 @@ function ae_response_action(status, result) {
     mqtt_client.subscribe(noti_topic);
 }
 
-
 function create_cnt_all(count, callback) {
-    sh_adn.crtct(count, function (rsc) {
-        console.log(count + ' - ' + conf.cnt[count].name + ' - x-m2m-rsc : ' + rsc + ' <----');
-        if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-            count++;
-            if(conf.cnt.length > count) {
-                create_cnt_all(count, function (rsc, count) {
-                    callback(rsc, count);
-                });
-            }
-            else {
-                callback(rsc, count);
-            }
+    if(conf.cnt.length == 0) {
+        callback(2001, count);
+    }
+    else {
+        if(conf.cnt.hasOwnProperty(count)) {
+            var parent = conf.cnt[count].parent;
+            var rn = conf.cnt[count].name;
+            sh_adn.crtct(parent, rn, count, function (rsc, res_body) {
+                if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
+                    create_cnt_all(++count, function (status, count) {
+                        callback(status, count);
+                    });
+                }
+                else {
+                    callback(9999, count);
+                }
+            });
         }
         else {
-            callback('9999', count);
+            callback(2001, count);
         }
-    });
+    }
 }
 
 function delete_sub_all(count, callback) {
-    sh_adn.delsub(count, function (rsc) {
-        console.log(count + ' - ' + conf.sub[count].name + ' - x-m2m-rsc : ' + rsc + ' <----');
-        if(rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
-            count++;
-            if(conf.sub.length > count) {
-                delete_sub_all(count, function (rsc, count) {
-                    callback(rsc, count);
-                });
-            }
-            else {
-                callback(rsc, count);
-            }
+    if(conf.sub.length == 0) {
+        callback(2001, count);
+    }
+    else {
+        if(conf.sub.hasOwnProperty(count)) {
+            var target = conf.sub[count].parent + '/' + conf.sub[count].name;
+            sh_adn.delsub(target, count, function (rsc, res_body) {
+                if (rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
+                    delete_sub_all(++count, function (status, count) {
+                        callback(status, count);
+                    });
+                }
+                else {
+                    callback(9999, count);
+                }
+            });
         }
         else {
-            callback('9999', count);
+            callback(2001, count);
         }
-    });
+    }
 }
 
 function create_sub_all(count, callback) {
-    sh_adn.crtsub(count, function (rsc) {
-        console.log(count + ' - ' + conf.sub[count].name + ' - x-m2m-rsc : ' + rsc + ' <----');
-        if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-            count++;
-            if(conf.sub.length > count) {
-                create_sub_all(count, function (rsc, count) {
-                    callback(rsc, count);
-                })
-            }
-            else {
-                callback(rsc, count);
-            }
+    if(conf.sub.length == 0) {
+        callback(2001, count);
+    }
+    else {
+        if(conf.sub.hasOwnProperty(count)) {
+            var parent = conf.sub[count].parent;
+            var rn = conf.sub[count].name;
+            var nu = conf.sub[count].nu;
+            sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
+                if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
+                    create_sub_all(++count, function (status, count) {
+                        callback(status, count);
+                    });
+                }
+                else {
+                    callback('9999', count);
+                }
+            });
         }
         else {
-            callback('9999', count);
+            callback(2001, count);
         }
-    });
+    }
 }
-
 
 function mqtt_watchdog() {
     if(sh_state == 'connect') {
     }
     else if(sh_state == 'crtae') {
-        console.log('[sh_state] : ' + sh_state);
+        sh_adn.crtae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
+            console.log(res_body);
+            if (status == 2001) {
+                ae_response_action(status, res_body, function (status, aeid) {
+                    console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
+                    sh_state = 'rtvae';
+                    request_count = 0;
+                    return_count = 0;
 
-        sh_adn.crtae(function(status, res_body) {
-            if(status == 2001) {
-                ae_response_action(status, res_body);
-                sh_state = 'crtct';
+                    setTimeout(http_watchdog, 100);
+                });
             }
-            else if(status == 5106 || status == 4105) {
+            else if (status == 5106 || status == 4105) {
                 console.log('x-m2m-rsc : ' + status + ' <----');
-                sh_state = 'rtvae'
+                sh_state = 'rtvae';
+
+                setTimeout(mqtt_watchdog, 100);
+            }
+            else {
+                setTimeout(mqtt_watchdog, 1000);
             }
         });
     }
     else if(sh_state == 'rtvae') {
+        if (conf.ae.id === 'S') {
+            conf.ae.id = 'S' + shortid.generate();
+        }
+
         console.log('[sh_state] : ' + sh_state);
-        sh_adn.rtvae(function(status, res_body) {
+        sh_adn.rtvae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
             if (status == 2000) {
                 var aeid = res_body['m2m:ae']['aei'];
                 console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
@@ -305,10 +331,15 @@ function mqtt_watchdog() {
                 }
                 else {
                     sh_state = 'crtct';
+                    request_count = 0;
+                    return_count = 0;
+
+                    setTimeout(mqtt_watchdog, 100);
                 }
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
+                setTimeout(mqtt_watchdog, 1000);
             }
         });
     }
@@ -322,35 +353,56 @@ function mqtt_watchdog() {
                 sh_state = 'delsub';
             }
         });
-    }
-    else if(sh_state == 'delsub') {
-        console.log('[sh_state] : ' + sh_state);
-        request_count = 0;
-        return_count = 0;
 
-        delete_sub_all(0, function(status, count) {
-            if(conf.sub.length <= count) {
-                sh_state = 'crtsub';
+        console.log('[sh_state] : ' + sh_state);
+        create_cnt_all(request_count, function (status, count) {
+            if(status == 9999) {
+                setTimeout(mqtt_watchdog, 1000);
+            }
+            else {
+                sh_state = 'delsub';
+                request_count = 0;
+                return_count = 0;
+
+                setTimeout(mqtt_watchdog, 100);
             }
         });
     }
-
-    else if(sh_state == 'crtsub') {
+    else if (sh_state === 'delsub') {
         console.log('[sh_state] : ' + sh_state);
-        request_count = 0;
-        return_count = 0;
+        delete_sub_all(request_count, function (status, count) {
+            if(status == 9999) {
+                setTimeout(mqtt_watchdog, 1000);
+            }
+            else {
+                sh_state = 'crtsub';
+                request_count = 0;
+                return_count = 0;
 
-        create_sub_all(0, function(status, count) {
-            if(conf.sub.length <= count) {
+                setTimeout(mqtt_watchdog, 100);
+            }
+        });
+    }
+    else if (sh_state === 'crtsub') {
+        console.log('[sh_state] : ' + sh_state);
+        create_sub_all(request_count, function (status, count) {
+            if(status == 9999) {
+                setTimeout(mqtt_watchdog, 1000);
+            }
+            else {
                 sh_state = 'crtci';
 
+                //ready_for_notification();
+
                 tas.ready();
+
+                setTimeout(mqtt_watchdog, 100);
             }
         });
     }
-    else if(sh_state == 'crtci') {
-
+    else if (sh_state === 'crtci') {
     }
 }
 
-wdt.set_wdt(require('shortid').generate(), 2, mqtt_watchdog);
+//wdt.set_wdt(require('shortid').generate(), 2, mqtt_watchdog);
+setTimeout(mqtt_watchdog, 100);

@@ -24,26 +24,25 @@ var cbor = require('cbor');
 
 global.callback_q = {};
 
-exports.crtae = function (callback) {
+exports.crtae = function (parent, rn, api, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;
-
     resp_mqtt_ri_arr.push(rqi);
-    resp_mqtt_path_arr[rqi] = conf.ae.parent;
+    resp_mqtt_path_arr[rqi] = parent;
 
     var req_message = {};
     req_message['m2m:rqp'] = {};
     req_message['m2m:rqp'].op = '1'; // create
-    req_message['m2m:rqp'].to = conf.ae.parent;
+    req_message['m2m:rqp'].to = parent;
     req_message['m2m:rqp'].fr = conf.ae.id;
     req_message['m2m:rqp'].rqi = rqi;
     req_message['m2m:rqp'].ty = '2'; // ae
     req_message['m2m:rqp'].pc = {};
     req_message['m2m:rqp'].pc['m2m:ae'] = {};
-    req_message['m2m:rqp'].pc['m2m:ae'].rn = conf.ae.name;
-    req_message['m2m:rqp'].pc['m2m:ae'].api = conf.ae.appid;
-    req_message['m2m:rqp'].pc['m2m:ae'].rr = 'true';
+    req_message['m2m:rqp'].pc['m2m:ae'].rn = rn;
+    req_message['m2m:rqp'].pc['m2m:ae'].api = api;
+    req_message['m2m:rqp'].pc['m2m:ae'].rr = true;
 
     if (conf.ae.bodytype == 'xml') {
         req_message['m2m:rqp']['@'] = {
@@ -51,7 +50,7 @@ exports.crtae = function (callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        req_message['m2m:rqp'].pc['m2m:ae']['@'] = {"rn": conf.ae.name};
+        req_message['m2m:rqp'].pc['m2m:ae']['@'] = {"rn": rn};
         delete req_message['m2m:rqp'].pc['m2m:ae'].rn;
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
@@ -73,7 +72,7 @@ exports.crtae = function (callback) {
     }
 };
 
-exports.rtvae = function (callback) {
+exports.rtvae = function (target, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;
@@ -84,7 +83,7 @@ exports.rtvae = function (callback) {
     var req_message = {};
     req_message['m2m:rqp'] = {};
     req_message['m2m:rqp'].op = '2'; // retrieve
-    req_message['m2m:rqp'].to = conf.ae.parent + '/' + conf.ae.name;
+    req_message['m2m:rqp'].to = target;
     req_message['m2m:rqp'].fr = conf.ae.id;
     req_message['m2m:rqp'].rqi = rqi;
     req_message['m2m:rqp'].pc = {};
@@ -124,7 +123,7 @@ exports.delae = function (path, callback) {
     // to do
 };
 
-exports.crtct = function(count, callback) {
+exports.crtct = function(parent, rn, count, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;
@@ -135,15 +134,15 @@ exports.crtct = function(count, callback) {
     var req_message = {};
     req_message['m2m:rqp'] = {};
     req_message['m2m:rqp'].op = '1'; // create
-    req_message['m2m:rqp'].to = conf.cnt[count].parent;
+    req_message['m2m:rqp'].to = parent;
     req_message['m2m:rqp'].fr = conf.ae.id;
     req_message['m2m:rqp'].rqi = rqi;
     req_message['m2m:rqp'].ty = '3'; // cnt
     req_message['m2m:rqp'].pc = {};
     req_message['m2m:rqp'].pc['m2m:cnt'] = {};
-    req_message['m2m:rqp'].pc['m2m:cnt'].rn = conf.cnt[count].name;
+    req_message['m2m:rqp'].pc['m2m:cnt'].rn = rn;
     req_message['m2m:rqp'].pc['m2m:cnt'].lbl = [];
-    req_message['m2m:rqp'].pc['m2m:cnt'].lbl.push(conf.cnt[count].name);
+    req_message['m2m:rqp'].pc['m2m:cnt'].lbl.push(rn);
 
     if (conf.ae.bodytype == 'xml') {
         req_message['m2m:rqp']['@'] = {
@@ -151,7 +150,7 @@ exports.crtct = function(count, callback) {
             "xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance"
         };
 
-        req_message['m2m:rqp'].pc['m2m:cnt']['@'] = {"rn": conf.cnt[count].name};
+        req_message['m2m:rqp'].pc['m2m:cnt']['@'] = {"rn": rn};
         delete req_message['m2m:rqp'].pc['m2m:cnt'].rn;
 
         var bodyString = js2xmlparser.parse("m2m:rqp", req_message['m2m:rqp']);
@@ -226,18 +225,18 @@ exports.delct = function(path, callback) {
 };
 
 
-exports.delsub = function(count, callback) {
+exports.delsub = function(target, count, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;
 
     resp_mqtt_ri_arr.push(rqi);
-    resp_mqtt_path_arr[rqi] = conf.sub[count].parent + '/' + conf.sub[count].name;
+    resp_mqtt_path_arr[rqi] = target;
 
     var req_message = {};
     req_message['m2m:rqp'] = {};
     req_message['m2m:rqp'].op = '4'; // delete
-    req_message['m2m:rqp'].to = conf.sub[count].parent + '/' + conf.sub[count].name;
+    req_message['m2m:rqp'].to = target;
     req_message['m2m:rqp'].fr = conf.ae.id;
     req_message['m2m:rqp'].rqi = rqi;
     req_message['m2m:rqp'].pc = {};
@@ -267,29 +266,29 @@ exports.delsub = function(count, callback) {
     }
 };
 
-exports.crtsub = function(count, callback) {
+exports.crtsub = function(parent, rn, nu, count, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;
 
     resp_mqtt_ri_arr.push(rqi);
-    resp_mqtt_path_arr[rqi] = conf.sub[count].parent;
+    resp_mqtt_path_arr[rqi] = parent;
 
     var req_message = {};
     req_message['m2m:rqp'] = {};
     req_message['m2m:rqp'].op = '1'; // create
-    req_message['m2m:rqp'].to = conf.sub[count].parent;
+    req_message['m2m:rqp'].to = parent;
     req_message['m2m:rqp'].fr = conf.ae.id;
     req_message['m2m:rqp'].rqi = rqi;
     req_message['m2m:rqp'].ty = '23'; // sub
     req_message['m2m:rqp'].pc = {};
     req_message['m2m:rqp'].pc['m2m:sub'] = {};
-    req_message['m2m:rqp'].pc['m2m:sub'].rn = conf.sub[count].name;
+    req_message['m2m:rqp'].pc['m2m:sub'].rn = rn;
     req_message['m2m:rqp'].pc['m2m:sub'].enc = {};
     req_message['m2m:rqp'].pc['m2m:sub'].enc.net = [];
     req_message['m2m:rqp'].pc['m2m:sub'].enc.net.push('3');
     req_message['m2m:rqp'].pc['m2m:sub'].nu = [];
-    req_message['m2m:rqp'].pc['m2m:sub'].nu.push(conf.sub[count].nu);
+    req_message['m2m:rqp'].pc['m2m:sub'].nu.push(nu);
     req_message['m2m:rqp'].pc['m2m:sub'].nct = '2';
 
     if (conf.ae.bodytype == 'xml') {
@@ -320,14 +319,13 @@ exports.crtsub = function(count, callback) {
     }
 };
 
-exports.crtci = function(parent, count, content, socket, callback) {
+exports.crtci = function(parent, count, content, callback) {
     var rqi = shortid.generate();
 
     callback_q[rqi] = callback;
 
     resp_mqtt_ri_arr.push(rqi);
     resp_mqtt_path_arr[rqi] = conf.cnt[count].parent + '/' + conf.cnt[count].name;
-    socket_q[rqi] = socket;
 
     var req_message = {};
     req_message['m2m:rqp'] = {};

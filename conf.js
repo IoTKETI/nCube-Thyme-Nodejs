@@ -55,6 +55,9 @@ cnt_arr[count++].name = 'co2';
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
 cnt_arr[count++].name = 'temp';
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
+cnt_arr[count++].name = 'led';
 
 //cnt_arr[count] = {};
 //cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
@@ -63,8 +66,8 @@ cnt_arr[count++].name = 'temp';
 // build sub
 count = 0;
 sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub-ctrl';
+sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[3].name;
+sub_arr[count].name = 'sub';
 sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id;
 
 // --------
