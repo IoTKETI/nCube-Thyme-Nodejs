@@ -23,10 +23,10 @@ var acp = {};
 
 conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
-conf.sim = 'disable'; // enable / disable
+conf.sim = 'enable'; // enable / disable
 
 // build cse
-cse.host        = 'localhost'; //'59.10.2.16';
+cse.host        = '203.253.128.161'; //'59.10.2.16';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius2';
@@ -34,38 +34,84 @@ cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'SOPHIE_DEMO';
+ae.name         = 'test_iot_algae';
 
 ae.id           = 'S'+ae.name;
 
 ae.parent       = '/' + cse.name;
-ae.appid        = 'measure_co2';
+ae.appid        = 'test_algae';
 ae.port         = '9727';
 ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'
-ae.tasport      = '3105';
+ae.tasport      = '3106';
 
 // build cnt
 var count = 0;
+
+// count -> 0  : arr[0]
 cnt_arr[count] = {};
 cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'tvoc';
+cnt_arr[count++].name = 'pontoon_titania';
+
+// count -> 1-1  : arr[1]
 cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'co2';
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name;
+cnt_arr[count++].name = 'analysis';
+
+// count -> 1-2  : arr[2]
 cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'temp';
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name;
+cnt_arr[count++].name = 'camera';
+
+// count -> 2-1  : arr[3]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name + '/' + cnt_arr[2].name;
+cnt_arr[count++].name = 'near-ir';
+
+// count -> 2-2  : arr[4]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name + '/' + cnt_arr[2].name;
+cnt_arr[count++].name = 'red-edge';
+
+// count -> 2-3 : arr[5]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name + '/' + cnt_arr[2].name;
+cnt_arr[count++].name = 'blue';
+
+// count -> 2-4 : arr[6]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name + '/' + cnt_arr[2].name;
+cnt_arr[count++].name = 'green';
+
+// count -> 2-5 : arr[7]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name + '/' + cnt_arr[2].name;
+cnt_arr[count++].name = 'red';
+
+// count -> 1-3 : arr[8]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name;
+cnt_arr[count++].name = 'control';
+
+// count -> 1-4 : arr[9]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name;
+cnt_arr[count++].name = 'data';
+
+// count -> 1-5 : arr[10]
+cnt_arr[count] = {};
+cnt_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[0].name;
+cnt_arr[count++].name = 'dataset';
 
 //cnt_arr[count] = {};
 //cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
 //cnt_arr[count++].name = 'timer';
 
 // build sub
-count = 0;
-sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub-ctrl';
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id;
+// count = 0;
+// sub_arr[count] = {};
+// sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
+// sub_arr[count].name = 'sub-ctrl';
+// sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id;
 
 // --------
 // sub_arr[count] = {};

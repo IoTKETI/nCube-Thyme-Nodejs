@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<m2m:conf xmlns:m2m="http://www.onem2m.org/xml/protocols" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <tas>
+        <!-- <comport>/COM1</comport>
+        <baudrate>9600</baudrate> -->
+        <!--<parenthostname>192.168.49.9</parenthostname>-->
+        <parenthostname>192.168.0.205</parenthostname>
+        <parentport>3105</parentport>
+    </tas>
+    <upload>
+        <ctname>near-ir</ctname>
+        <id>near_ir</id>
+    </upload>
+    <upload>
+        <ctname>red-edge</ctname>
+        <id>red_edge</id>
+    </upload>
+    <upload>
+        <ctname>blue</ctname>
+        <id>blue</id>
+    </upload>
+    <upload>
+        <ctname>green</ctname>
+        <id>green</id>
+    </upload>
+    <upload>
+        <ctname>red</ctname>
+        <id>red</id>
+    </upload>
+    <upload>
+        <ctname>data</ctname>
+        <id>data</id>
+    </upload>
+</m2m:conf>
