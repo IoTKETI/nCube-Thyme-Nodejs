@@ -109,10 +109,6 @@ exports.response_mqtt = function (rsp_topic, rsc, to, fr, rqi, inpc, bodytype) {
     else { // 'json'
         mqtt_client.publish(rsp_topic, JSON.stringify(rsp_message['m2m:rsp']));
     }
-
-    xmlString = null;
-    delete rsp_message;
-    rsp_message = null;
 };
 
 exports.response_ws = function (connection, rsc, to, fr, rqi, inpc, bodytype) {
@@ -216,11 +212,6 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj) {
         }
 
         _this.parse_sgn(rqi, pc, function (path_arr, cinObj, rqi) {
-            delete pc;
-            pc = null;
-            delete jsonObj;
-            jsonObj = null;
-
             if(cinObj) {
                 if(cinObj.sud || cinObj.vrq) {
                     var resp_topic = '/oneM2M/resp/' + topic_arr[3] + '/' + topic_arr[4] + '/' + topic_arr[5];
