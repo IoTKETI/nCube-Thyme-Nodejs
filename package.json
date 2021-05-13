@@ -1,0 +1,37 @@
+{
+    "name": "nCube-thyme-Nodejs",
+    "version": "2.5.0",
+    "description": "oneM2M Client",
+    "main": "thyme.js",
+    "directories": {
+        "doc": "doc"
+    },
+    "dependencies": {
+        "cbor": "^7.0.5",
+        "express": "^4.17.1",
+        "ip": "^1.1.5",
+        "js2xmlparser": "^4.0.1",
+        "mqtt": "^4.2.6",
+        "shortid": "^2.2.16",
+        "xml2js": "^0.4.23"
+    },
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://IoTKETI@github.com/IoTKETI/nCube-Thyme-Nodejs.git"
+    },
+    "keywords": [
+        "oneM2M",
+        "nCube",
+        "Mobius"
+    ],
+    "author": "Il Yeup, Ahn (KETI)",
+    "license": "BSD 3-clause",
+    "bugs": {
+        "url": "https://github.com/IoTKETI/nCube-Thyme-Nodejs/issues"
+    },
+    "homepage": "https://github.com/IoTKETI/nCube-Thyme-Nodejs#readme"
+}
