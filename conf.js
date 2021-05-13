@@ -21,12 +21,12 @@ var cnt_arr = [];
 var sub_arr = [];
 var acp = {};
 
-conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
+conf.useprotocol = 'mqtt'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
 conf.sim = 'disable'; // enable / disable
 
 // build cse
-cse.host        = 'localhost'; //'59.10.2.16';
+cse.host        = '203.253.128.161'; //'59.10.2.16';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius2';

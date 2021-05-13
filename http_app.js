@@ -497,63 +497,63 @@ function mqtt_connect(serverip, noti_topic) {
         }
 
         mqtt_client = mqtt.connect(connectOptions);
-    }
 
-    mqtt_client.on('connect', function () {
-        mqtt_client.subscribe(noti_topic);
-        console.log('[mqtt_connect] noti_topic : ' + noti_topic);
-    });
+        mqtt_client.on('connect', function () {
+            mqtt_client.subscribe(noti_topic);
+            console.log('[mqtt_connect] noti_topic : ' + noti_topic);
+        });
 
-    mqtt_client.on('message', function (topic, message) {
+        mqtt_client.on('message', function (topic, message) {
 
-        var topic_arr = topic.split("/");
+            var topic_arr = topic.split("/");
 
-        var bodytype = conf.ae.bodytype;
-        if(topic_arr[5] != null) {
-            bodytype = (topic_arr[5] === 'xml') ? topic_arr[5] : ((topic_arr[5] === 'json') ? topic_arr[5] : ((topic_arr[5] === 'cbor') ? topic_arr[5] : 'json'));
-        }
-
-        if(topic_arr[1] === 'oneM2M' && topic_arr[2] === 'req' && topic_arr[4] === conf.ae.id) {
-            console.log(message.toString());
-            if(bodytype === 'xml') {
-                var parser = new xml2js.Parser({explicitArray: false});
-                parser.parseString(message.toString(), function (err, jsonObj) {
-                    if (err) {
-                        console.log('[mqtt noti xml2js parser error]');
-                    }
-                    else {
-                        noti.mqtt_noti_action(topic_arr, jsonObj);
-                    }
-                });
+            var bodytype = conf.ae.bodytype;
+            if(topic_arr[5] != null) {
+                bodytype = (topic_arr[5] === 'xml') ? topic_arr[5] : ((topic_arr[5] === 'json') ? topic_arr[5] : ((topic_arr[5] === 'cbor') ? topic_arr[5] : 'json'));
             }
-            else if(bodytype === 'cbor') {
-                var encoded = message.toString();
-                cbor.decodeFirst(encoded, function(err, jsonObj) {
-                    if (err) {
-                        console.log('[mqtt noti cbor parser error]');
-                    }
-                    else {
-                        noti.mqtt_noti_action(topic_arr, jsonObj);
-                    }
-                });
-            }
-            else { // json
-                var jsonObj = JSON.parse(message.toString());
 
-                if (jsonObj['m2m:rqp'] == null) {
-                    jsonObj['m2m:rqp'] = jsonObj;
+            if(topic_arr[1] === 'oneM2M' && topic_arr[2] === 'req' && topic_arr[4] === conf.ae.id) {
+                console.log(message.toString());
+                if(bodytype === 'xml') {
+                    var parser = new xml2js.Parser({explicitArray: false});
+                    parser.parseString(message.toString(), function (err, jsonObj) {
+                        if (err) {
+                            console.log('[mqtt noti xml2js parser error]');
+                        }
+                        else {
+                            noti.mqtt_noti_action(topic_arr, jsonObj);
+                        }
+                    });
                 }
-                noti.mqtt_noti_action(topic_arr, jsonObj);
-            }
-        }
-        else {
-            console.log('topic is not supported');
-        }
-    });
+                else if(bodytype === 'cbor') {
+                    var encoded = message.toString();
+                    cbor.decodeFirst(encoded, function(err, jsonObj) {
+                        if (err) {
+                            console.log('[mqtt noti cbor parser error]');
+                        }
+                        else {
+                            noti.mqtt_noti_action(topic_arr, jsonObj);
+                        }
+                    });
+                }
+                else { // json
+                    var jsonObj = JSON.parse(message.toString());
 
-    mqtt_client.on('error', function (err) {
-        console.log(err.message);
-    });
+                    if (jsonObj['m2m:rqp'] == null) {
+                        jsonObj['m2m:rqp'] = jsonObj;
+                    }
+                    noti.mqtt_noti_action(topic_arr, jsonObj);
+                }
+            }
+            else {
+                console.log('topic is not supported');
+            }
+        });
+
+        mqtt_client.on('error', function (err) {
+            console.log(err.message);
+        });
+    }
 }
 
 var onem2mParser = bodyParser.text(
