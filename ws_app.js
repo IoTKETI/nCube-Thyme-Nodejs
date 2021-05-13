@@ -47,7 +47,7 @@ for(var i = 0; i < conf.sub.length; i++) {
 
 global.sh_adn = require('./ws_adn');
 var noti = require('./noti');
-var tas = require('./thyme_tas');
+var thyme_tas = require('./thyme_tas');
 
 function ws_callback(jsonObj) {
     for (var i = 0; i < resp_mqtt_ri_arr.length; i++) {
@@ -261,7 +261,7 @@ function ws_watchdog() {
             if(conf.sub.length <= count) {
                 sh_state = 'crtci';
 
-                tas.ready();
+                thyme_tas.ready_for_tas();
 
                 ready_for_notification();
 

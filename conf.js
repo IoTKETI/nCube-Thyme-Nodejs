@@ -21,12 +21,12 @@ var cnt_arr = [];
 var sub_arr = [];
 var acp = {};
 
-conf.useprotocol = 'mqtt'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
+conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
-conf.sim = 'disable'; // enable / disable
+conf.sim = 'enable'; // enable / disable
 
 // build cse
-cse.host        = '203.253.128.161'; //'59.10.2.16';
+cse.host        = '203.253.128.161';
 cse.port        = '7579';
 cse.name        = 'Mobius';
 cse.id          = '/Mobius2';
@@ -75,19 +75,6 @@ sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype;
 //sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
 //sub_arr[count++].nu = 'Mobius/'+ae.name; // mqtt
 // --------
-
-sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub1';
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '1?ct=json'; // mqtt
-sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub2';
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '2?ct=json'; // mqtt
-sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub3';
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '3?ct=json'; // mqtt
 
 
 /*// --------

@@ -27,7 +27,7 @@ var noti_topic = '/oneM2M/req/+/'+conf.ae.id+'/#';
 
 global.sh_adn = require('./mqtt_adn');
 var noti = require('./noti');
-var tas = require('./thyme_tas');
+var thyme_tas = require('./thyme_tas');
 
 if (conf.usesecure === 'disable') {
     var connectOptions = {
@@ -344,7 +344,7 @@ function mqtt_watchdog() {
             if(conf.sub.length <= count) {
                 sh_state = 'crtci';
 
-                tas.ready();
+                thyme_tas.ready_for_tas();
             }
         });
     }

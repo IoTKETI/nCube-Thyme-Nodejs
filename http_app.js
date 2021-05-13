@@ -24,19 +24,25 @@ var ip = require('ip');
 var shortid = require('shortid');
 var cbor = require('cbor');
 
-global.sh_adn = require('./http_adn');
+var Onem2mClient = require('./onem2m_http');
+
+var options = {
+    host: conf.cse.host,
+    port: conf.cse.port,
+    aei: conf.ae.id,
+    bodytype: conf.ae.bodytype,
+    usesecure: conf.usesecure,
+};
+
+var onem2m_client = new Onem2mClient(options, 'api');
+
 var noti = require('./noti');
-var tas = require('./thyme_tas');
+var thyme_tas = require('./thyme_tas');
 
 var HTTP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;
 
 var app = express();
-
-//app.use(bodyParser.urlencoded({ extended: true }));
-//app.use(bodyParser.json());
-//app.use(bodyParser.json({ type: 'application/*+json' }));
-//app.use(bodyParser.text({ type: 'application/*+xml' }));
 
 // ?????? ????????.
 var server = null;
@@ -107,7 +113,7 @@ function create_cnt_all(count, callback) {
         if(conf.cnt.hasOwnProperty(count)) {
             var parent = conf.cnt[count].parent;
             var rn = conf.cnt[count].name;
-            sh_adn.crtct(parent, rn, count, function (rsc, res_body, count) {
+            onem2m_client.create_cnt(parent, rn, count, function (rsc, res_body, count) {
                 if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
                     create_cnt_all(++count, function (status, count) {
                         callback(status, count);
@@ -131,7 +137,7 @@ function delete_sub_all(count, callback) {
     else {
         if(conf.sub.hasOwnProperty(count)) {
             var target = conf.sub[count].parent + '/' + conf.sub[count].name;
-            sh_adn.delsub(target, count, function (rsc, res_body, count) {
+            onem2m_client.delete_sub(target, count, function (rsc, res_body, count) {
                 if (rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
                     delete_sub_all(++count, function (status, count) {
                         callback(status, count);
@@ -157,7 +163,7 @@ function create_sub_all(count, callback) {
             var parent = conf.sub[count].parent;
             var rn = conf.sub[count].name;
             var nu = conf.sub[count].nu;
-            sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
+            onem2m_client.create_sub(parent, rn, nu, count, function (rsc, res_body, count) {
                 if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
                     create_sub_all(++count, function (status, count) {
                         callback(status, count);
@@ -174,173 +180,10 @@ function create_sub_all(count, callback) {
     }
 }
 
-// function create_cnt_all(count, callback) {
-//     if(conf.cnt.length == 0) {
-//         callback(2001, count);
-//     }
-//     else {
-//         var parent = conf.cnt[count].parent;
-//         var rn = conf.cnt[count].name;
-//         sh_adn.crtct(parent, rn, count, function (rsc, res_body, count) {
-//             if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-//                 callback(rsc, count);
-//             }
-//             else {
-//                 callback('9999', count);
-//             }
-//         });
-//     }
-// }
-
-// function delete_sub_all(count, callback) {
-//     if(conf.sub.length == 0) {
-//         callback(2001, count);
-//     }
-//     else {
-//         var target = conf.sub[count].parent + '/' + conf.sub[count].name;
-//         sh_adn.delsub(target, count, function (rsc, res_body, count) {
-//             if(rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
-//                 callback(rsc, count);
-//             }
-//             else {
-//                 callback('9999', count);
-//             }
-//         });
-//     }
-// }
-//
-// function create_sub_all(count, callback) {
-//     if(conf.sub.length == 0) {
-//         callback(2001, count);
-//     }
-//     else {
-//         var parent = conf.sub[count].parent;
-//         var rn = conf.sub[count].name;
-//         var nu = conf.sub[count].nu;
-//         sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
-//             if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-//                 callback(rsc, count);
-//             }
-//             else {
-//                 callback('9999', count);
-//             }
-//         });
-//     }
-// }
-
-// function http_watchdog() {
-//     if (sh_state === 'crtae') {
-//         console.log('[sh_state] : ' + sh_state);
-//         sh_adn.crtae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
-//             console.log(res_body);
-//             if (status == 2001) {
-//                 ae_response_action(status, res_body, function (status, aeid) {
-//                     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
-//                     sh_state = 'crtct';
-//                     request_count = 0;
-//                     return_count = 0;
-//                 });
-//             }
-//             else if (status == 5106 || status == 4105) {
-//                 console.log('x-m2m-rsc : ' + status + ' <----');
-//                 sh_state = 'rtvae'
-//             }
-//         });
-//     }
-//     else if (sh_state === 'rtvae') {
-//         if (conf.ae.id === 'S') {
-//             conf.ae.id = 'S' + shortid.generate();
-//         }
-//
-//         console.log('[sh_state] : ' + sh_state);
-//         sh_adn.rtvae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
-//             if (status == 2000) {
-//                 var aeid = res_body['m2m:ae']['aei'];
-//                 console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
-//
-//                 if(conf.ae.id != aeid && conf.ae.id != ('/'+aeid)) {
-//                     console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
-//                 }
-//                 else {
-//                     sh_state = 'crtct';
-//                     request_count = 0;
-//                     return_count = 0;
-//                 }
-//             }
-//             else {
-//                 console.log('x-m2m-rsc : ' + status + ' <----');
-//             }
-//         });
-//     }
-//     else if (sh_state === 'crtct') {
-//         console.log('[sh_state] : ' + sh_state);
-//         if(return_count == 0) {
-//             create_cnt_all(request_count, function (status, count) {
-//                 request_count = ++count;
-//                 return_count = 0;
-//                 if (conf.cnt.length <= count) {
-//                     sh_state = 'delsub';
-//                     request_count = 0;
-//                     return_count = 0;
-//                 }
-//             });
-//         }
-//         return_count++;
-//         if(return_count >= 3) {
-//             return_count = 0;
-//         }
-//     }
-//     else if (sh_state === 'delsub') {
-//         console.log('[sh_state] : ' + sh_state);
-//         if(return_count == 0) {
-//             delete_sub_all(request_count, function (status, count) {
-//                 request_count = ++count;
-//                 return_count = 0;
-//                 if (conf.sub.length <= count) {
-//                     sh_state = 'crtsub';
-//                     request_count = 0;
-//                     return_count = 0;
-//                 }
-//             });
-//         }
-//         return_count++;
-//         if(return_count >= 3) {
-//             return_count = 0;
-//         }
-//     }
-//     else if (sh_state === 'crtsub') {
-//         console.log('[sh_state] : ' + sh_state);
-//         if(return_count == 0) {
-//             create_sub_all(request_count, function (status, count) {
-//                 request_count = ++count;
-//                 return_count = 0;
-//                 if (conf.sub.length <= count) {
-//                     sh_state = 'crtci';
-//
-//                     ready_for_notification();
-//
-//                     tas.ready();
-//
-//                     // var _ae = {};
-//                     // _ae.id = conf.ae.id;
-//                     // fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
-//                 }
-//             });
-//         }
-//         return_count++;
-//         if(return_count >= 3) {
-//             return_count = 0;
-//         }
-//     }
-//     else if (sh_state === 'crtci') {
-//
-//     }
-// }
-
 function http_watchdog() {
     if (sh_state === 'crtae') {
         console.log('[sh_state] : ' + sh_state);
-        sh_adn.crtae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
+        onem2m_client.create_ae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
             console.log(res_body);
             if (status == 2001) {
                 ae_response_action(status, res_body, function (status, aeid) {
@@ -366,7 +209,7 @@ function http_watchdog() {
         }
 
         console.log('[sh_state] : ' + sh_state);
-        sh_adn.rtvae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
+        onem2m_client.retrieve_ae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
             if (status == 2000) {
                 var aeid = res_body['m2m:ae']['aei'];
                 console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
@@ -440,7 +283,7 @@ function http_watchdog() {
 
                     ready_for_notification();
 
-                    tas.ready();
+                    thyme_tas.ready_for_tas();
 
                     setTimeout(http_watchdog, 100);
                 }
@@ -448,16 +291,20 @@ function http_watchdog() {
         });
     }
     else if (sh_state === 'crtci') {
+        if(conf.sim == 'enable') {
+            var period = 1000; //ms
+            var cnt_idx = 0;
+            setTimeout(timer_upload, 1000, period, cnt_idx);
+        }
     }
 }
 
-//wdt.set_wdt(require('shortid').generate(), 1, http_watchdog);
+
 setTimeout(http_watchdog, 100);
 
 
 // for notification
 //var xmlParser = bodyParser.text({ type: '*/*' });
-
 
 function mqtt_connect(serverip, noti_topic) {
     if(mqtt_client == null) {
@@ -638,6 +485,28 @@ app.post('/:resourcename0', onem2mParser, function(request, response) {
 app.get('/conf', onem2mParser, function(request, response, next) {
 
 });
+
+
+var t_count = 0;
+function timer_upload_action(cnt_idx, content, period) {
+    if (sh_state == 'crtci') {
+        var parent = conf.cnt[cnt_idx].parent + '/' + conf.cnt[cnt_idx].name;
+        onem2m_client.create_cin(parent, cnt_idx, content, this, function (status, res_body, to, socket) {
+            console.log('x-m2m-rsc : ' + status + ' <----');
+        });
+
+        setTimeout(timer_upload, 0, period, cnt_idx);
+    }
+    else {
+        setTimeout(timer_upload, 1000, period, cnt_idx);
+    }
+}
+
+function timer_upload(period, cnt_idx) {
+    var content = JSON.stringify({value: 'TAS' + t_count++});
+    setTimeout(timer_upload_action, period, cnt_idx, content, period);
+}
+
 
 /* for testing
 app.use(function(request, response, next) {

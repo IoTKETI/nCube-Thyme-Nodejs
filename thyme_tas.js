@@ -16,43 +16,20 @@
 var net = require('net');
 var ip = require('ip');
 
-var socket_arr = {};
-exports.socket_arr = socket_arr;
+global.socket_arr = {};
 
 var tas_buffer = {};
 exports.buffer = tas_buffer;
 
 
-var t_count = 0;
-function timer_upload_action(num, content) {
-    if (sh_state == 'crtci') {
-        var parent = conf.cnt[num].parent + '/' + conf.cnt[num].name;
-        sh_adn.crtci(parent, num, content, this, function (status, res_body, to, socket) {
-            console.log('x-m2m-rsc : ' + status + ' <----');
-        });
-
-        setTimeout(timer_upload, 0);
-    }
-    else {
-        setTimeout(timer_upload, 1000);
-    }
-}
-
-function timer_upload() {
-    var gap = parseInt(100 + Math.random() * 100);
-    var num = parseInt(Math.random() * 2.9);
-    var content = JSON.stringify({value: 'TAS' + t_count++});
-    setTimeout(timer_upload_action, gap, num, content);
-}
-
 var _server = null;
-exports.ready = function tas_ready () {
+exports.ready_for_tas = function ready_for_tas () {
     if(_server == null) {
         _server = net.createServer(function (socket) {
             console.log('socket connected');
             socket.id = Math.random() * 1000;
             tas_buffer[socket.id] = '';
-            socket.on('data', tas_handler);
+            socket.on('data', thyme_tas_handler);
             socket.on('end', function() {
                 console.log('end');
             });
@@ -67,14 +44,10 @@ exports.ready = function tas_ready () {
         _server.listen(conf.ae.tasport, function() {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tasport);
         });
-
-        if(conf.sim == 'enable') {
-            setTimeout(timer_upload, 1000);
-        }
     }
 };
 
-function tas_handler (data) {
+function thyme_tas_handler (data) {
     // 'this' refers to the socket calling this callback.
     tas_buffer[this.id] += data.toString();
     //console.log(tas_buffer[this.id]);
@@ -136,73 +109,3 @@ function tas_handler (data) {
     }
 }
 
-
-exports.send_tweet = function(cinObj) {
-    var fs = require('fs');
-    var Twitter = require('twitter');
-
-    var twitter_client = new Twitter({
-        consumer_key: 'tV4cipDkQcMzZh8RAWsEToDP2',
-        consumer_secret: '1rAIO5DCuFnRkYVefjst2ULVStBl6Dfucs2AVBjo1pcSx8jROT',
-        access_token_key: '4157451558-lo0rgStwJ3ewEi47TpmrWnoDBPIRB3hcHeNggEk',
-        access_token_secret: 'KlmoKMSvcWPuX1mcmuOd1SIvh8DyLXQD9ja3NeMoVCzdl'
-    });
-
-    var params = {screen_name: 'gbsmfather'};
-    twitter_client.get('statuses/user_timeline', params, function(error, tweets, response){
-        if (!error) {
-            console.log(tweets[0].text);
-        }
-    });
-
-    var cur_d = new Date();
-    var cur_o = cur_d.getTimezoneOffset() / (-60);
-    cur_d.setHours(cur_d.getHours() + cur_o);
-    var cur_time = cur_d.toISOString().replace(/\..+/, '');
-
-    var con_arr = (cinObj.con != null ? cinObj.con : cinObj.content).split(',');
-
-    if (con_arr[con_arr.length-1] != null) {
-        var bitmap = new Buffer(con_arr[con_arr.length-1], 'base64');
-        fs.writeFileSync('decode.jpg', bitmap);
-
-        twitter_client.post('media/upload', {media: bitmap}, function (error, media, response) {
-            if (error) {
-                console.log(error[0].message);
-                return;
-            }
-            // If successful, a media object will be returned.
-            console.log(media);
-
-            // Lets tweet it
-            var status = {
-                status: '[' + cur_time + '] Give me water ! - ',
-                media_ids: media.media_id_string // Pass the media id string
-            };
-
-            twitter_client.post('statuses/update', status, function (error, tweet, response) {
-                if (!error) {
-                    console.log(tweet.text);
-                }
-            });
-        });
-    }
-};
-
-exports.noti = function(path_arr, cinObj) {
-    var cin = {};
-    cin.ctname = path_arr[path_arr.length-2];
-    cin.con = (cinObj.con != null) ? cinObj.con : cinObj.content;
-
-    if(cin.con == '') {
-        console.log('---- is not cin message');
-    }
-    else {
-        //console.log(JSON.stringify(cin));
-        console.log('<---- send to tas');
-
-        if (socket_arr[path_arr[path_arr.length-2]] != null) {
-            socket_arr[path_arr[path_arr.length-2]].write(JSON.stringify(cin) + '<EOF>');
-        }
-    }
-};
