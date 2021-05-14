@@ -12,92 +12,26 @@
  * Created by ryeubi on 2015-08-31.
  */
 
-var http = require('http');
-var express = require('express');
-var fs = require('fs');
-var bodyParser = require('body-parser');
-var mqtt = require('mqtt');
-var util = require('util');
-var xml2js = require('xml2js');
-var url = require('url');
-var ip = require('ip');
-var shortid = require('shortid');
-var cbor = require('cbor');
+var Onem2mClient = require('./onem2m_client');
 
-var Onem2mClient = require('./onem2m_http');
+var thyme_tas = require('./thyme_tas');
+
 
 var options = {
+    protocol: conf.useprotocol,
     host: conf.cse.host,
     port: conf.cse.port,
+    mqttport: conf.cse.mqttport,
+    wsport: conf.cse.wsport,
+    cseid: conf.cse.id,
     aei: conf.ae.id,
+    aeport: conf.ae.port,
     bodytype: conf.ae.bodytype,
     usesecure: conf.usesecure,
 };
 
-var onem2m_client = new Onem2mClient(options, 'api');
+var onem2m_client = new Onem2mClient(options);
 
-var noti = require('./noti');
-var thyme_tas = require('./thyme_tas');
-
-var HTTP_SUBSCRIPTION_ENABLE = 0;
-var MQTT_SUBSCRIPTION_ENABLE = 0;
-
-var app = express();
-
-// ?????? ????????.
-var server = null;
-var noti_topic = '';
-
-// ready for mqtt
-for(var i = 0; i < conf.sub.length; i++) {
-    if(conf.sub[i].name != null) {
-        if(url.parse(conf.sub[i].nu).protocol === 'http:') {
-            HTTP_SUBSCRIPTION_ENABLE = 1;
-            if(url.parse(conf.sub[i]['nu']).hostname === 'autoset') {
-                conf.sub[i]['nu'] = 'http://' + ip.address() + ':' + conf.ae.port + url.parse(conf.sub[i]['nu']).pathname;
-            }
-        }
-        else if(url.parse(conf.sub[i].nu).protocol === 'mqtt:') {
-            MQTT_SUBSCRIPTION_ENABLE = 1;
-        }
-        else {
-            //console.log('notification uri of subscription is not supported');
-            //process.exit();
-        }
-    }
-}
-
-var return_count = 0;
-var request_count = 0;
-
-function ready_for_notification() {
-    if(HTTP_SUBSCRIPTION_ENABLE == 1) {
-        server = http.createServer(app);
-        server.listen(conf.ae.port, function () {
-            console.log('http_server running at ' + conf.ae.port + ' port');
-        });
-    }
-
-    if(MQTT_SUBSCRIPTION_ENABLE == 1) {
-        for(var i = 0; i < conf.sub.length; i++) {
-            if (conf.sub[i].name != null) {
-                if (url.parse(conf.sub[i].nu).protocol === 'mqtt:') {
-                    if (url.parse(conf.sub[i]['nu']).hostname === 'autoset') {
-                        conf.sub[i]['nu'] = 'mqtt://' + conf.cse.host + '/' + conf.ae.id;
-                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.id);
-                    }
-                    else if (url.parse(conf.sub[i]['nu']).hostname === conf.cse.host) {
-                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.id);
-                    }
-                    else {
-                        noti_topic = util.format('%s', url.parse(conf.sub[i].nu).pathname);
-                    }
-                }
-            }
-        }
-        mqtt_connect(conf.cse.host, noti_topic);
-    }
-}
 
 function ae_response_action(status, res_body, callback) {
     var aeid = res_body['m2m:ae']['aei'];
@@ -180,35 +114,36 @@ function create_sub_all(count, callback) {
     }
 }
 
-function http_watchdog() {
-    if (sh_state === 'crtae') {
-        console.log('[sh_state] : ' + sh_state);
+setTimeout(setup_resources, 100, 'crtae');
+
+function setup_resources(_status) {
+    sh_state = _status;
+
+    console.log('[status] : ' + _status);
+
+    if (_status === 'crtae') {
         onem2m_client.create_ae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
             console.log(res_body);
             if (status == 2001) {
                 ae_response_action(status, res_body, function (status, aeid) {
                     console.log('x-m2m-rsc : ' + status + ' - ' + aeid + ' <----');
-                    sh_state = 'rtvae';
                     request_count = 0;
-                    return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(setup_resources, 100, 'rtvae');
                 });
             }
             else if (status == 5106 || status == 4105) {
                 console.log('x-m2m-rsc : ' + status + ' <----');
-                sh_state = 'rtvae';
 
-                setTimeout(http_watchdog, 100);
+                setTimeout(setup_resources, 100, 'rtvae');
+            }
+            else {
+                console.log('[???} create container error!  ', status + ' <----');
+                // setTimeout(setup_resources, 3000, 'crtae');
             }
         });
     }
-    else if (sh_state === 'rtvae') {
-        if (conf.ae.id === 'S') {
-            conf.ae.id = 'S' + shortid.generate();
-        }
-
-        console.log('[sh_state] : ' + sh_state);
+    else if (_status === 'rtvae') {
         onem2m_client.retrieve_ae(conf.ae.parent + '/' + conf.ae.name, function (status, res_body) {
             if (status == 2000) {
                 var aeid = res_body['m2m:ae']['aei'];
@@ -218,79 +153,63 @@ function http_watchdog() {
                     console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
                 }
                 else {
-                    sh_state = 'crtct';
                     request_count = 0;
-                    return_count = 0;
-
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(setup_resources, 100, 'crtct');
                 }
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
-                setTimeout(http_watchdog, 1000);
+                // setTimeout(setup_resources, 3000, 'rtvae');
             }
         });
     }
-    else if (sh_state === 'crtct') {
-        console.log('[sh_state] : ' + sh_state);
+    else if (_status === 'crtct') {
         create_cnt_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 1000);
+                console.log('[???} create container error!');
+                // setTimeout(setup_resources, 3000, 'crtct');
             }
             else {
                 request_count = ++count;
-                return_count = 0;
                 if (conf.cnt.length <= count) {
-                    sh_state = 'delsub';
                     request_count = 0;
-                    return_count = 0;
-
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(setup_resources, 100, 'delsub');
                 }
             }
         });
     }
-    else if (sh_state === 'delsub') {
-        console.log('[sh_state] : ' + sh_state);
+    else if (_status === 'delsub') {
         delete_sub_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 1000);
+                console.log('[???} create container error!');
+                // setTimeout(setup_resources, 3000, 'delsub');
             }
             else {
                 request_count = ++count;
-                return_count = 0;
                 if (conf.sub.length <= count) {
-                    sh_state = 'crtsub';
                     request_count = 0;
-                    return_count = 0;
-
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(setup_resources, 100, 'crtsub');
                 }
             }
         });
     }
-    else if (sh_state === 'crtsub') {
-        console.log('[sh_state] : ' + sh_state);
+    else if (_status === 'crtsub') {
         create_sub_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 1000);
+                console.log('[???} create container error!');
+                // setTimeout(setup_resources, 1000, 'crtsub');
             }
             else {
                 request_count = ++count;
-                return_count = 0;
                 if (conf.sub.length <= count) {
-                    sh_state = 'crtci';
-
-                    ready_for_notification();
-
                     thyme_tas.ready_for_tas();
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(setup_resources, 100, 'crtci');
                 }
             }
         });
     }
-    else if (sh_state === 'crtci') {
+    else if (_status === 'crtci') {
         if(conf.sim == 'enable') {
             var period = 1000; //ms
             var cnt_idx = 0;
@@ -299,193 +218,21 @@ function http_watchdog() {
     }
 }
 
+onem2m_client.on('notification', function (source_uri, cinObj) {
 
-setTimeout(http_watchdog, 100);
+    console.log(source_uri, cinObj);
 
+    var path_arr = source_uri.split('/')
+    var event_cnt_name = path_arr[path_arr.length-2];
+    var content = cinObj.con;
 
-// for notification
-//var xmlParser = bodyParser.text({ type: '*/*' });
-
-function mqtt_connect(serverip, noti_topic) {
-    if(mqtt_client == null) {
-        if (conf.usesecure === 'disable') {
-            var connectOptions = {
-                host: serverip,
-                port: conf.cse.mqttport,
-//              username: 'keti',
-//              password: 'keti123',
-                protocol: "mqtt",
-                keepalive: 10,
-//              clientId: serverUID,
-                protocolId: "MQTT",
-                protocolVersion: 4,
-                clean: true,
-                reconnectPeriod: 2000,
-                connectTimeout: 2000,
-                rejectUnauthorized: false
-            };
+    if(event_cnt_name === 'co2') {
+        // send to tas
+        if (socket_arr[path_arr[path_arr.length-2]] != null) {
+            socket_arr[path_arr[path_arr.length-2]].write(JSON.stringify(content) + '<EOF>');
         }
-        else {
-            connectOptions = {
-                host: serverip,
-                port: conf.cse.mqttport,
-                protocol: "mqtts",
-                keepalive: 10,
-//              clientId: serverUID,
-                protocolId: "MQTT",
-                protocolVersion: 4,
-                clean: true,
-                reconnectPeriod: 2000,
-                connectTimeout: 2000,
-                key: fs.readFileSync("./server-key.pem"),
-                cert: fs.readFileSync("./server-crt.pem"),
-                rejectUnauthorized: false
-            };
-        }
-
-        mqtt_client = mqtt.connect(connectOptions);
-
-        mqtt_client.on('connect', function () {
-            mqtt_client.subscribe(noti_topic);
-            console.log('[mqtt_connect] noti_topic : ' + noti_topic);
-        });
-
-        mqtt_client.on('message', function (topic, message) {
-
-            var topic_arr = topic.split("/");
-
-            var bodytype = conf.ae.bodytype;
-            if(topic_arr[5] != null) {
-                bodytype = (topic_arr[5] === 'xml') ? topic_arr[5] : ((topic_arr[5] === 'json') ? topic_arr[5] : ((topic_arr[5] === 'cbor') ? topic_arr[5] : 'json'));
-            }
-
-            if(topic_arr[1] === 'oneM2M' && topic_arr[2] === 'req' && topic_arr[4] === conf.ae.id) {
-                console.log(message.toString());
-                if(bodytype === 'xml') {
-                    var parser = new xml2js.Parser({explicitArray: false});
-                    parser.parseString(message.toString(), function (err, jsonObj) {
-                        if (err) {
-                            console.log('[mqtt noti xml2js parser error]');
-                        }
-                        else {
-                            noti.mqtt_noti_action(topic_arr, jsonObj);
-                        }
-                    });
-                }
-                else if(bodytype === 'cbor') {
-                    var encoded = message.toString();
-                    cbor.decodeFirst(encoded, function(err, jsonObj) {
-                        if (err) {
-                            console.log('[mqtt noti cbor parser error]');
-                        }
-                        else {
-                            noti.mqtt_noti_action(topic_arr, jsonObj);
-                        }
-                    });
-                }
-                else { // json
-                    var jsonObj = JSON.parse(message.toString());
-
-                    if (jsonObj['m2m:rqp'] == null) {
-                        jsonObj['m2m:rqp'] = jsonObj;
-                    }
-                    noti.mqtt_noti_action(topic_arr, jsonObj);
-                }
-            }
-            else {
-                console.log('topic is not supported');
-            }
-        });
-
-        mqtt_client.on('error', function (err) {
-            console.log(err.message);
-        });
     }
-}
-
-var onem2mParser = bodyParser.text(
-    {
-        limit: '1mb',
-        type: 'application/onem2m-resource+xml;application/xml;application/json;application/vnd.onem2m-res+xml;application/vnd.onem2m-res+json'
-    }
-);
-
-var noti_count = 0;
-
-app.post('/:resourcename0', onem2mParser, function(request, response) {
-    var fullBody = '';
-    request.on('data', function (chunk) {
-        fullBody += chunk.toString();
-    });
-    request.on('end', function () {
-        request.body = fullBody;
-
-        console.log(fullBody);
-
-        for (var i = 0; i < conf.sub.length; i++) {
-            if (conf.sub[i]['nu'] != null) {
-                if(url.parse(conf.sub[i].nu).protocol === 'http:') {
-                    var nu_path = url.parse(conf.sub[i]['nu']).pathname.toString().split('/')[1];
-                    if (nu_path === request.params.resourcename0) {
-                        var content_type = request.headers['content-type'];
-                        if(content_type.includes('xml')) {
-                            var bodytype = 'xml';
-                        }
-                        else if(content_type.includes('cbor')) {
-                            bodytype = 'cbor';
-                        }
-                        else {
-                            bodytype = 'json';
-                        }
-                        if (bodytype === 'json') {
-                            try {
-                                var pc = JSON.parse(request.body);
-                                var rqi = request.headers['x-m2m-ri'];
-
-                                noti.http_noti_action(rqi, pc, 'json', response);
-                            }
-                            catch (e) {
-                                console.log(e);
-                            }
-                        }
-                        else if(bodytype === 'cbor') {
-                            var encoded = request.body;
-                            cbor.decodeFirst(encoded, function(err, pc) {
-                                if (err) {
-                                    console.log('[http noti cbor parser error]');
-                                }
-                                else {
-                                    var rqi = request.headers['x-m2m-ri'];
-
-                                    noti.http_noti_action(rqi, pc, 'cbor', response);
-                                }
-                            });
-                        }
-                        else {
-                            var parser = new xml2js.Parser({explicitArray: false});
-                            parser.parseString(request.body, function (err, pc) {
-                                if (err) {
-                                    console.log('[http noti xml2js parser error]');
-                                }
-                                else {
-                                    var rqi = request.headers['x-m2m-ri'];
-
-                                    noti.http_noti_action(rqi, pc, 'xml', response);
-                                }
-                            });
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    });
 });
-
-app.get('/conf', onem2mParser, function(request, response, next) {
-
-});
-
 
 var t_count = 0;
 function timer_upload_action(cnt_idx, content, period) {
@@ -523,3 +270,4 @@ app.use(function(request, response, next) {
     });
 });
 */
+

@@ -8,11 +8,14 @@
     },
     "dependencies": {
         "cbor": "^7.0.5",
+        "coap": "^0.24.0",
         "express": "^4.17.1",
         "ip": "^1.1.5",
         "js2xmlparser": "^4.0.1",
         "mqtt": "^4.2.6",
+        "node-gyp-build": "^4.2.3",
         "shortid": "^2.2.16",
+        "websocket": "^1.0.34",
         "xml2js": "^0.4.23"
     },
     "devDependencies": {},

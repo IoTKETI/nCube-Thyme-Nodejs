@@ -27,21 +27,22 @@ global.conf = require('./conf.js');
 //global.sh_state = 'rtvae';
 global.sh_state = 'crtae';
 
-global.wdt = require('./wdt');
+//global.wdt = require('./wdt');
 
 global.mqtt_client = null;
 
 // AE core
-if(conf.useprotocol === 'mqtt') {
-    require('./mqtt_app');
-}
-else if(conf.useprotocol === 'coap') {
-    require('./coap_app');
-}
-else if(conf.useprotocol === 'ws') {
-    require('./ws_app');
-}
-else {
+// if(conf.useprotocol === 'mqtt') {
+//     require('./mqtt_app');
+// }
+// else
+// if(conf.useprotocol === 'coap') {
+//     require('./coap_app');
+// }
+// else if(conf.useprotocol === 'ws') {
+//     require('./ws_app');
+// }
+// else {
     require('./http_app');
-}
+// }
 
