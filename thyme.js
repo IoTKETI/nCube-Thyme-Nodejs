@@ -43,6 +43,6 @@ global.mqtt_client = null;
 //     require('./ws_app');
 // }
 // else {
-    require('./http_app');
+    require('./app');
 // }
 
