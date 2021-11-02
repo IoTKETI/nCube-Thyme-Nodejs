@@ -73,7 +73,7 @@ function thyme_tas_handler (data) {
                         if (conf.cnt[j].name == ctname) {
                             //console.log(line);
                             var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
-                            sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
+                            onem2m_client.create_cin(parent, j, content, this, function (status, res_body, to, socket) {
                                 try {
                                     var to_arr = to.split('/');
                                     var ctname = to_arr[to_arr.length - 1];
