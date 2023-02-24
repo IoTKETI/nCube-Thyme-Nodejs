@@ -16,7 +16,6 @@ var Onem2mClient = require('./onem2m_client');
 
 var thyme_tas = require('./thyme_tas');
 
-
 var options = {
     protocol: conf.useprotocol,
     host: conf.cse.host,
@@ -30,7 +29,7 @@ var options = {
     usesecure: conf.usesecure,
 };
 
-var onem2m_client = new Onem2mClient(options);
+global.onem2m_client = new Onem2mClient(options);
 
 
 function ae_response_action(status, res_body, callback) {
@@ -210,11 +209,6 @@ function setup_resources(_status) {
         });
     }
     else if (_status === 'crtci') {
-        if(conf.sim == 'enable') {
-            var period = 1000; //ms
-            var cnt_idx = 0;
-            setTimeout(timer_upload, 1000, period, cnt_idx);
-        }
     }
 }
 
@@ -226,48 +220,10 @@ onem2m_client.on('notification', function (source_uri, cinObj) {
     var event_cnt_name = path_arr[path_arr.length-2];
     var content = cinObj.con;
 
-    if(event_cnt_name === 'co2') {
+    /* ***** USER CODE ***** */
+    if(event_cnt_name === 'led') {
         // send to tas
-        if (socket_arr[path_arr[path_arr.length-2]] != null) {
-            socket_arr[path_arr[path_arr.length-2]].write(JSON.stringify(content) + '<EOF>');
-        }
+        thyme_tas.send_to_tas(event_cnt_name, content);
     }
+    /* */
 });
-
-var t_count = 0;
-function timer_upload_action(cnt_idx, content, period) {
-    if (sh_state == 'crtci') {
-        var parent = conf.cnt[cnt_idx].parent + '/' + conf.cnt[cnt_idx].name;
-        onem2m_client.create_cin(parent, cnt_idx, content, this, function (status, res_body, to, socket) {
-            console.log('x-m2m-rsc : ' + status + ' <----');
-        });
-
-        setTimeout(timer_upload, 0, period, cnt_idx);
-    }
-    else {
-        setTimeout(timer_upload, 1000, period, cnt_idx);
-    }
-}
-
-function timer_upload(period, cnt_idx) {
-    var content = JSON.stringify({value: 'TAS' + t_count++});
-    setTimeout(timer_upload_action, period, cnt_idx, content, period);
-}
-
-
-/* for testing
-app.use(function(request, response, next) {
-    var fullBody = '';
-    request.on('data', function (chunk) {
-        fullBody += chunk.toString();
-    });
-    request.on('end', function () {
-        request.body = fullBody;
-
-        console.log(fullBody);
-
-        response.status(200).send('');
-    });
-});
-*/
-

@@ -12,9 +12,6 @@
  * Created by Il Yeup, Ahn in KETI on 2016-08-19.
  */
 
-var fs = require('fs');
-var shortid = require('shortid');
-
 global.resp_mqtt_ri_arr = [];
 
 global.resp_mqtt_path_arr = {};

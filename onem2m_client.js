@@ -1582,7 +1582,7 @@ var crtsub = function(parent, rn, nu, count, callback) {
     }
     else if (url.parse(nu).protocol === 'mqtt:') {
         var noti_topic = util.format('/oneM2M/req/+/%s/#', onem2m_options.aei);
-        mqtt_connect(url.parse(nu).host, url.parse(nu).port, noti_topic);
+        mqtt_connect(url.parse(nu).hostname, url.parse(nu).port, noti_topic);
     }
     else if(url.parse(nu).protocol === 'coap') {
         coap_server = coap.createServer();
@@ -1790,12 +1790,12 @@ var delsub = function(target, count, callback) {
 };
 
 
-var crtci = function(parent, count, content, socket, callback) {
+var crtci = function(parent, count, strContent, socket, callback) {
     if(onem2m_options.protocol === 'http') {
         var results_ci = {};
         var bodyString = '';
         if (onem2m_options.bodytype === 'xml') {
-            results_ci.con = content;
+            results_ci.con = strContent;
 
             results_ci['@'] = {
                 "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
@@ -1806,13 +1806,13 @@ var crtci = function(parent, count, content, socket, callback) {
         }
         else if (onem2m_options.bodytype === 'cbor') {
             results_ci['m2m:cin'] = {};
-            results_ci['m2m:cin'].con = content;
+            results_ci['m2m:cin'].con = strContent;
             bodyString = cbor.encode(results_ci).toString('hex');
             console.log(bodyString);
         }
         else {
             results_ci['m2m:cin'] = {};
-            results_ci['m2m:cin'].con = content;
+            results_ci['m2m:cin'].con = strContent;
 
             bodyString = JSON.stringify(results_ci);
         }
@@ -1839,7 +1839,7 @@ var crtci = function(parent, count, content, socket, callback) {
         req_message['m2m:rqp'].ty = '4'; // cin
         req_message['m2m:rqp'].pc = {};
         req_message['m2m:rqp'].pc['m2m:cin'] = {};
-        req_message['m2m:rqp'].pc['m2m:cin'].con = content;
+        req_message['m2m:rqp'].pc['m2m:cin'].con = strContent;
 
         if (onem2m_options.bodytype === 'xml') {
             req_message['m2m:rqp']['@'] = {
@@ -1869,7 +1869,7 @@ var crtci = function(parent, count, content, socket, callback) {
         results_ci = {};
         bodyString = '';
         if(onem2m_options.bodytype === 'xml') {
-            results_ci.con = content;
+            results_ci.con = strContent;
 
             results_ci['@'] = {
                 "xmlns:m2m": "http://www.onem2m.org/xml/protocols",
@@ -1880,13 +1880,13 @@ var crtci = function(parent, count, content, socket, callback) {
         }
         else if(onem2m_options.bodytype === 'cbor') {
             results_ci['m2m:cin'] = {};
-            results_ci['m2m:cin'].con = content;
+            results_ci['m2m:cin'].con = strContent;
             bodyString = cbor.encode(results_ci).toString('hex');
             console.log(bodyString);
         }
         else {
             results_ci['m2m:cin'] = {};
-            results_ci['m2m:cin'].con = content;
+            results_ci['m2m:cin'].con = strContent;
 
             bodyString = JSON.stringify(results_ci);
         }
@@ -1921,7 +1921,7 @@ var crtci = function(parent, count, content, socket, callback) {
         req_message['m2m:rqp'].ty = '4'; // cin
         req_message['m2m:rqp'].pc = {};
         req_message['m2m:rqp'].pc['m2m:cin'] = {};
-        req_message['m2m:rqp'].pc['m2m:cin'].con = content;
+        req_message['m2m:rqp'].pc['m2m:cin'].con = strContent;
 
         if (onem2m_options.bodytype === 'xml') {
             req_message['m2m:rqp']['@'] = {

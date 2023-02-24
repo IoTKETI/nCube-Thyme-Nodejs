@@ -13,6 +13,7 @@
  */
 
 var ip = require("ip");
+var nanoid = require("nanoid");
 
 var conf = {};
 var cse = {};
@@ -23,75 +24,84 @@ var acp = {};
 
 conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
-conf.sim = 'disable'; // enable / disable
+conf.sim = 'disable'; // enable or disable
 
 // build cse
-cse.host        = '203.253.128.161';
-cse.port        = '7579';
-cse.name        = 'Mobius';
-cse.id          = '/Mobius2';
-cse.mqttport    = '1883';
-cse.wsport      = '7577';
+cse = {
+    host    : '203.253.128.177',
+    port    : '7579',
+    name    : 'Mobius',
+    id      : '/Mobius2',
+    mqttport: '1883',
+    wsport  : '7577',
+};
 
 // build ae
-ae.name         = 'IYAHN_DEMO';
+let ae_name = 'KETI3_DEMO';
 
-ae.id           = 'S'+ae.name;
-
-ae.parent       = '/' + cse.name;
-ae.appid        = 'measure_co2';
-ae.port         = '9727';
-ae.bodytype     = 'json'; // select 'json' or 'xml' or 'cbor'
-ae.tasport      = '3105';
+ae = {
+    name    : ae_name,
+    id      : 'S'+ae_name,
+    parent  : '/' + cse.name,
+    appid   : 'measure_co2',
+    port    : '9727',
+    bodytype: 'json',
+    tasport : '3105',
+};
 
 // build cnt
 var count = 0;
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'tvoc';
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'co2';
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'temp';
-cnt_arr[count] = {};
-cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-cnt_arr[count++].name = 'led';
-
-//cnt_arr[count] = {};
-//cnt_arr[count].parent = '/' + cse.name + '/' + ae.name;
-//cnt_arr[count++].name = 'timer';
-
-
-
-
+cnt_arr = [
+    {
+        parent: '/' + cse.name + '/' + ae.name,
+        name: 'tvoc',
+    },
+    {
+        parent: '/' + cse.name + '/' + ae.name,
+        name: 'co2',
+    },
+    {
+        parent: '/' + cse.name + '/' + ae.name,
+        name: 'temp',
+    },
+    {
+        parent: '/' + cse.name + '/' + ae.name,
+        name: 'led',
+    },
+];
 
 // build sub
-count = 0;
-sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[3].name;
-sub_arr[count].name = 'sub';
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=' + ae.bodytype; // mqtt
-sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
+sub_arr = [
+    {
+        parent: cnt_arr[3].parent + '/'  + cnt_arr[3].name,
+        name: 'sub1',
+        nu: 'mqtt://' + cse.host + ':' + cse.mqttport + '/' + ae.id + '?ct=json', // 'http:/' + ip.address() + ':' + ae.port + '/noti?ct=json',
+    },
+];
 
-// --------
+// for tas
+let tas = {
+    client: {
+        connected: false,
+    },
 
-
-/*// --------
-sub_arr[count] = {};
-sub_arr[count].parent = '/' + cse.name + '/' + ae.name + '/' + cnt_arr[1].name;
-sub_arr[count].name = 'sub2';
-//sub_arr[count++].nu = 'http://' + ip.address() + ':' + ae.port + '/noti?ct=json'; // http
-//sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?rcn=9&ct=' + ae.bodytype; // mqtt
-sub_arr[count++].nu = 'mqtt://' + cse.host + '/' + ae.id + '?ct=json'; // mqtt
-// -------- */
+    connection: {
+        host: 'localhost',
+        port: 1883,
+        endpoint: '',
+        clean: true,
+        connectTimeout: 4000,
+        reconnectPeriod: 4000,
+        clientId: 'thyme_' + nanoid(15),
+        username: 'keti_thyme',
+        password: 'keti_thyme',
+    },
+};
 
 // build acp: not complete
 acp.parent = '/' + cse.name + '/' + ae.name;
 acp.name = 'acp-' + ae.name;
 acp.id = ae.id;
-
 
 conf.usesecure  = 'disable';
 
@@ -104,6 +114,6 @@ conf.ae = ae;
 conf.cnt = cnt_arr;
 conf.sub = sub_arr;
 conf.acp = acp;
-
+conf.tas = tas;
 
 module.exports = conf;

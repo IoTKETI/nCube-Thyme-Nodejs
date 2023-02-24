@@ -13,8 +13,6 @@
  */
 
 // for TAS
-var net = require('net');
-var ip = require('ip');
 
 global.socket_arr = {};
 
@@ -22,90 +20,180 @@ var tas_buffer = {};
 exports.buffer = tas_buffer;
 
 
-var _server = null;
-exports.ready_for_tas = function ready_for_tas () {
-    if(_server == null) {
-        _server = net.createServer(function (socket) {
-            console.log('socket connected');
-            socket.id = Math.random() * 1000;
-            tas_buffer[socket.id] = '';
-            socket.on('data', thyme_tas_handler);
-            socket.on('end', function() {
-                console.log('end');
-            });
-            socket.on('close', function() {
-                console.log('close');
-            });
-            socket.on('error', function(e) {
-                console.log('error ', e);
-            });
-        });
+// for tas
 
-        _server.listen(conf.ae.tasport, function() {
-            console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tasport);
+let mqtt = require('mqtt');
+let moment = require('moment');
+
+/* USER CODE */
+let getDataTopic = {
+    co2: '/thyme/co2',
+    tvoc: '/thyme/tvoc',
+    temp: '/thyme/temp',
+};
+
+let setDataTopic = {
+    led: '/led/set',
+};
+/* */
+
+let createConnection = () => {
+    if (conf.tas.client.connected) {
+        console.log('Already connected --> destroyConnection')
+        destroyConnection();
+    }
+
+    if (!conf.tas.client.connected) {
+        conf.tas.client.loading = true;
+        const {host, port, endpoint, ...options} = conf.tas.connection;
+        const connectUrl = `mqtt://${host}:${port}${endpoint}`
+        try {
+            conf.tas.client = mqtt.connect(connectUrl, options);
+
+            conf.tas.client.on('connect', () => {
+                console.log(host, 'Connection succeeded!');
+
+                conf.tas.client.connected = true;
+                conf.tas.client.loading = false;
+
+                for(let topicName in getDataTopic) {
+                    if(getDataTopic.hasOwnProperty(topicName)) {
+                        doSubscribe(getDataTopic[topicName]);
+                    }
+                }
+            });
+
+            conf.tas.client.on('error', (error) => {
+                console.log('Connection failed', error);
+
+                destroyConnection();
+            });
+
+            conf.tas.client.on('close', () => {
+                console.log('Connection closed');
+
+                destroyConnection();
+            });
+
+            conf.tas.client.on('message', (topic, message) => {
+                let content = null;
+                let parent = null;
+
+                /* USER CODES */
+                if(topic === getDataTopic.co2) {
+                    parent = conf.cnt[1].parent + '/' + conf.cnt[1].name;
+                    let curTime =  moment().format();
+                    let curVal = parseFloat(message.toString()).toFixed(1);
+                    content = {
+                        t: curTime,
+                        v: curVal
+                    };
+                }
+                else if(topic === getDataTopic.tvoc) {
+                    parent = conf.cnt[1].parent + '/' + conf.cnt[0].name;
+                    let curTime =  moment().format();
+                    let curVal = parseFloat(message.toString()).toFixed(1);
+                    content = {
+                        t: curTime,
+                        v: curVal
+                    };
+                }
+                else if(topic === getDataTopic.temp) {
+                    parent = conf.cnt[1].parent + '/' + conf.cnt[2].name;
+                    let curTime =  moment().format();
+                    let curVal = parseFloat(message.toString()).toFixed(1);
+                    content = {
+                        t: curTime,
+                        v: curVal
+                    };
+                }
+                /* */
+
+                if(content !== null) {
+                    onem2m_client.create_cin(parent, 1, JSON.stringify(content), this, function (status, res_body, to, socket) {
+                        console.log('x-m2m-rsc : ' + status + ' <----');
+                    });
+                }
+            });
+        }
+        catch (error) {
+            console.log('mqtt.connect error', error);
+            conf.tas.client.connected = false;
+        }
+    }
+};
+
+let doSubscribe = (topic) => {
+    if (conf.tas.client.connected) {
+        const qos = 0;
+        conf.tas.client.subscribe(topic, {qos}, (error) => {
+            if (error) {
+                console.log('Subscribe to topics error', error)
+                return;
+            }
+
+            console.log('Subscribe to topics (', topic, ')');
         });
     }
 };
 
-function thyme_tas_handler (data) {
-    // 'this' refers to the socket calling this callback.
-    tas_buffer[this.id] += data.toString();
-    //console.log(tas_buffer[this.id]);
-    var data_arr = tas_buffer[this.id].split('<EOF>');
-    if(data_arr.length >= 2) {
-        for (var i = 0; i < data_arr.length-1; i++) {
-            var line = data_arr[i];
-            tas_buffer[this.id] = tas_buffer[this.id].replace(line+'<EOF>', '');
-            var jsonObj = JSON.parse(line);
-            var ctname = jsonObj.ctname;
-            var content = jsonObj.con;
-
-            socket_arr[ctname] = this;
-
-            console.log('----> got data for [' + ctname + '] from tas ---->');
-
-            if (jsonObj.con == 'hello') {
-                this.write(line + '<EOF>');
+let doUnSubscribe = (topic) => {
+    if (conf.tas.client.connected) {
+        conf.tas.client.unsubscribe(topic, error => {
+            if (error) {
+                console.log('Unsubscribe error', error)
             }
-            else {
-                if (sh_state == 'crtci') {
-                    for (var j = 0; j < conf.cnt.length; j++) {
-                        if (conf.cnt[j].name == ctname) {
-                            //console.log(line);
-                            var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
-                            sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
-                                try {
-                                    var to_arr = to.split('/');
-                                    var ctname = to_arr[to_arr.length - 1];
-                                    var result = {};
-                                    result.ctname = ctname;
-                                    result.con = status;
 
-                                    console.log('<---- x-m2m-rsc : ' + status + ' <----');
-                                    if (status == 5106 || status == 2001 || status == 4105) {
-                                        socket.write(JSON.stringify(result) + '<EOF>');
-                                    }
-                                    else if (status == 5000) {
-                                        sh_state = 'crtae';
-                                        socket.write(JSON.stringify(result) + '<EOF>');
-                                    }
-                                    else if (status == 9999) {
-                                        socket.write(JSON.stringify(result) + '<EOF>');
-                                    }
-                                    else {
-                                        socket.write(JSON.stringify(result) + '<EOF>');
-                                    }
-                                }
-                                catch (e) {
-                                    console.log(e.message);
-                                }
-                            });
-                            break;
-                        }
-                    }
-                }
+            console.log('Unsubscribe to topics (', topic, ')');
+        });
+    }
+};
+
+let doPublish = (topic, payload) => {
+    if (conf.tas.client.connected) {
+        conf.tas.client.publish(topic, payload, 0, error => {
+            if (error) {
+                console.log('Publish error', error)
             }
+        });
+    }
+};
+
+let destroyConnection = () => {
+    if (conf.tas.client.connected) {
+        try {
+            if(Object.hasOwnProperty.call(conf.tas.client, '__ob__')) {
+                conf.tas.client.end();
+            }
+            conf.tas.client = {
+                connected: false,
+                loading: false
+            }
+            console.log(this.name, 'Successfully disconnected!');
+        }
+        catch (error) {
+            console.log('Disconnect failed', error.toString())
         }
     }
-}
+};
 
+
+exports.ready_for_tas = function ready_for_tas () {
+    createConnection();
+
+    /* ***** USER CODE ***** */
+    if(conf.sim === 'enable') {
+        let t_count = 0;
+        setInterval(() => {
+            let val = (Math.random() * 50).toFixed(1);
+            doPublish('/thyme/co2', val);
+        }, 5000, t_count);
+    }
+    /* */
+};
+
+exports.send_to_tas = function send_to_tas (topicName, message) {
+    if(setDataTopic.hasOwnProperty(topicName)) {
+        conf.tas.client.publish(setDataTopic[topicName], message.toString())
+    }
+};
