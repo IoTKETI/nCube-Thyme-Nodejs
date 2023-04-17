@@ -28,7 +28,7 @@ conf.sim = 'disable'; // enable or disable
 
 // build cse
 cse = {
-    host    : '203.253.128.177',
+    host    : 'localhost',
     port    : '7579',
     name    : 'Mobius',
     id      : '/Mobius2',
