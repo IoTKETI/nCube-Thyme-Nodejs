@@ -14,10 +14,11 @@
         "js2xmlparser": "^4.0.1",
         "moment": "^2.29.4",
         "mqtt": "^4.2.6",
-        "nanoid": "^3.1.30",
+        "nanoid": "^3.2.0",
         "node-gyp-build": "^4.2.3",
         "websocket": "^1.0.34",
-        "xml2js": "^0.4.23"
+        "xml2js": "^0.4.23",
+        "shortid": "^2.2.16"
     },
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"

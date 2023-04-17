@@ -13,7 +13,7 @@
  */
 
 var ip = require("ip");
-var nanoid = require("nanoid");
+let { nanoid } = require("nanoid");
 
 var conf = {};
 var cse = {};
