@@ -16,12 +16,13 @@ let tas = {
     },
 
     connection: {
-        host: '192.168.50.58',
+        host: '127.0.0.1',
         port: 1883,
         endpoint: '',
         clean: true,
-        connectTimeout: 4000,
-        reconnectPeriod: 4000,
+        reconnectPeriod: 2000,
+        connectTimeout: 30000,
+        queueQoSZero: false,
         clientId: 'tas_' + nanoid(15),
         username: 'keti_thyme',
         password: 'keti_thyme',
