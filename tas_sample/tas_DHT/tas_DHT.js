@@ -140,14 +140,14 @@ let doPublish = (topic, payload) => {
 let destroyConnection = () => {
     if (tas.client.connected) {
         try {
-            if(Object.hasOwnProperty.call(tas.client, '__ob__')) {
+            if (Object.hasOwnProperty.call(tas.client, '__ob__')) {
                 tas.client.end();
             }
             tas.client = {
                 connected: false,
                 loading: false
             }
-            console.log(this.name, 'Successfully disconnected!');
+            console.log('Successfully disconnected!');
         }
         catch (error) {
             console.log('Disconnect failed', error.toString())
@@ -160,8 +160,8 @@ createConnection();
 /* USER CODE */
 /* DHT sensing interval */
 setInterval(() => {
-    sensor.read(DHT_sensor["type"], DHT_sensor["GPIO_PIN"], function(err, temperature, humidity) {
-        if(!err) {
+    sensor.read(DHT_sensor["type"], DHT_sensor["GPIO_PIN"], function (err, temperature, humidity) {
+        if (!err) {
             let con_body = {
                 "temp": temperature,
                 "humidity": humidity

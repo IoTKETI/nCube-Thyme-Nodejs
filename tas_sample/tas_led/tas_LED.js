@@ -178,7 +178,7 @@ let destroyConnection = () => {
                 connected: false,
                 loading: false
             }
-            console.log(this.name, 'Successfully disconnected!');
+            console.log('Successfully disconnected!');
         }
         catch (error) {
             console.log('Disconnect failed', error.toString())

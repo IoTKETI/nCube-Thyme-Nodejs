@@ -12,15 +12,15 @@
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-var ip = require("ip");
-let { nanoid } = require("nanoid");
+const ip = require("ip");
+const { nanoid } = require("nanoid");
 
-var conf = {};
-var cse = {};
-var ae = {};
-var cnt_arr = [];
-var sub_arr = [];
-var acp = {};
+let conf = {};
+let cse = {};
+let ae = {};
+let cnt_arr = [];
+let sub_arr = [];
+let acp = {};
 
 conf.useprotocol = 'http'; // select one for 'http' or 'mqtt' or 'coap' or 'ws'
 
@@ -41,7 +41,7 @@ let ae_name = 'KETI3_DEMO';
 
 ae = {
     name    : ae_name,
-    id      : 'S'+ae_name,
+    id      : 'S' + ae_name,
     parent  : '/' + cse.name,
     appid   : 'measure_co2',
     port    : '9727',

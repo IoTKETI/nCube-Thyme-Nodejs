@@ -5,7 +5,7 @@
  */
 
 let mqtt = require('mqtt');
-let nanoid = require('nanoid');
+let {nanoid} = require('nanoid');
 
 /* USER CODE */
 // for sensor
@@ -57,8 +57,8 @@ let createConnection = () => {
                 tas.client.connected = true;
                 tas.client.loading = false;
 
-                for(let topicName in recvDataTopic) {
-                    if(recvDataTopic.hasOwnProperty(topicName)) {
+                for (let topicName in recvDataTopic) {
+                    if (recvDataTopic.hasOwnProperty(topicName)) {
                         doSubscribe(recvDataTopic[topicName]);
                     }
                 }
@@ -80,7 +80,7 @@ let createConnection = () => {
                 let content = null;
 
                 /* USER CODES */
-                if(topic === recvDataTopic.led) {
+                if (topic === recvDataTopic.led) {
                     // LED 제어
                 }
                 /* */
@@ -132,14 +132,14 @@ let doPublish = (topic, payload) => {
 let destroyConnection = () => {
     if (tas.client.connected) {
         try {
-            if(Object.hasOwnProperty.call(tas.client, '__ob__')) {
+            if (Object.hasOwnProperty.call(tas.client, '__ob__')) {
                 tas.client.end();
             }
             tas.client = {
                 connected: false,
                 loading: false
             }
-            console.log(this.name, 'Successfully disconnected!');
+            console.log('Successfully disconnected!');
         }
         catch (error) {
             console.log('Disconnect failed', error.toString())

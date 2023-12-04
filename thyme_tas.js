@@ -16,7 +16,7 @@
 
 global.socket_arr = {};
 
-var tas_buffer = {};
+let tas_buffer = {};
 exports.buffer = tas_buffer;
 
 
@@ -56,8 +56,8 @@ let createConnection = () => {
                 conf.tas.client.connected = true;
                 conf.tas.client.loading = false;
 
-                for(let topicName in getDataTopic) {
-                    if(getDataTopic.hasOwnProperty(topicName)) {
+                for (let topicName in getDataTopic) {
+                    if (getDataTopic.hasOwnProperty(topicName)) {
                         doSubscribe(getDataTopic[topicName]);
                     }
                 }
@@ -80,27 +80,27 @@ let createConnection = () => {
                 let parent = null;
 
                 /* USER CODES */
-                if(topic === getDataTopic.co2) {
+                if (topic === getDataTopic.co2) {
                     parent = conf.cnt[1].parent + '/' + conf.cnt[1].name;
-                    let curTime =  moment().format();
+                    let curTime = moment().format();
                     let curVal = parseFloat(message.toString()).toFixed(1);
                     content = {
                         t: curTime,
                         v: curVal
                     };
                 }
-                else if(topic === getDataTopic.tvoc) {
+                else if (topic === getDataTopic.tvoc) {
                     parent = conf.cnt[1].parent + '/' + conf.cnt[0].name;
-                    let curTime =  moment().format();
+                    let curTime = moment().format();
                     let curVal = parseFloat(message.toString()).toFixed(1);
                     content = {
                         t: curTime,
                         v: curVal
                     };
                 }
-                else if(topic === getDataTopic.temp) {
+                else if (topic === getDataTopic.temp) {
                     parent = conf.cnt[1].parent + '/' + conf.cnt[2].name;
-                    let curTime =  moment().format();
+                    let curTime = moment().format();
                     let curVal = parseFloat(message.toString()).toFixed(1);
                     content = {
                         t: curTime,
@@ -109,8 +109,8 @@ let createConnection = () => {
                 }
                 /* */
 
-                if(content !== null) {
-                    onem2m_client.create_cin(parent, 1, JSON.stringify(content), this, function (status, res_body, to, socket) {
+                if (content) {
+                    onem2m_client.create_cin(parent, 1, JSON.stringify(content), this, (status, res_body, to, socket) => {
                         console.log('x-m2m-rsc : ' + status + ' <----');
                     });
                 }
@@ -162,14 +162,14 @@ let doPublish = (topic, payload) => {
 let destroyConnection = () => {
     if (conf.tas.client.connected) {
         try {
-            if(Object.hasOwnProperty.call(conf.tas.client, '__ob__')) {
+            if (Object.hasOwnProperty.call(conf.tas.client, '__ob__')) {
                 conf.tas.client.end();
             }
             conf.tas.client = {
                 connected: false,
                 loading: false
             }
-            console.log(this.name, 'Successfully disconnected!');
+            console.log('Successfully disconnected!');
         }
         catch (error) {
             console.log('Disconnect failed', error.toString())
@@ -178,11 +178,11 @@ let destroyConnection = () => {
 };
 
 
-exports.ready_for_tas = function ready_for_tas () {
+exports.ready_for_tas = function ready_for_tas() {
     createConnection();
 
     /* ***** USER CODE ***** */
-    if(conf.sim === 'enable') {
+    if (conf.sim === 'enable') {
         let t_count = 0;
         setInterval(() => {
             let val = (Math.random() * 50).toFixed(1);
@@ -192,8 +192,8 @@ exports.ready_for_tas = function ready_for_tas () {
     /* */
 };
 
-exports.send_to_tas = function send_to_tas (topicName, message) {
-    if(setDataTopic.hasOwnProperty(topicName)) {
+exports.send_to_tas = function send_to_tas(topicName, message) {
+    if (setDataTopic.hasOwnProperty(topicName)) {
         conf.tas.client.publish(setDataTopic[topicName], message.toString())
     }
 };
