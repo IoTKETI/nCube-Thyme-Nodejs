@@ -1,17 +1,16 @@
 {
-  "name": "tas",
-  "version": "0.0.2",
-  "dependencies": {
-    "serialport": "^7.0.2",
-    "mqtt": "^4.2.6",
-    "nanoid": "^4.0.1"
-  },
-  "description": "tas of &Cube",
-  "main": "tas_emulator.js",
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "Il Yeup Ahn, KETI",
-  "license": "ISC"
+    "name": "tas_emulator",
+    "version": "0.0.2",
+    "dependencies": {
+        "mqtt": "^4.2.6",
+        "nanoid": "^3.2.0"
+    },
+    "description": "tas of &Cube",
+    "main": "tas_emulator.js",
+    "devDependencies": {},
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Il Yeup Ahn, KETI",
+    "license": "ISC"
 }

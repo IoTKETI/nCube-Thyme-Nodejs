@@ -1,7 +1,16 @@
 {
-  "dependencies": {
-    "mqtt": "^4.3.7",
-    "nanoid": "^3.2.0",
-    "onoff": "^6.0.3"
-  }
+    "name": "tas_led",
+    "version": "1.0.0",
+    "main": "tas_LED.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "mqtt": "^4.3.7",
+        "nanoid": "^3.2.0",
+        "onoff": "^6.0.3"
+    },
+    "author": "Il Yeup Ahn, KETI",
+    "license": "ISC",
+    "description": ""
 }
