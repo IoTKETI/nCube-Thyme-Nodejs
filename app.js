@@ -31,6 +31,8 @@ var options = {
 
 global.onem2m_client = new Onem2mClient(options);
 
+let sh_state = 'rtvct';
+let request_count = 0;
 
 function ae_response_action(status, res_body, callback) {
     var aeid = res_body['m2m:ae']['aei'];
@@ -216,11 +218,11 @@ onem2m_client.on('notification', function (source_uri, cinObj) {
 
     console.log(source_uri, cinObj);
 
+    /* ***** USER CODE ***** */
     var path_arr = source_uri.split('/')
     var event_cnt_name = path_arr[path_arr.length-2];
     var content = cinObj.con;
 
-    /* ***** USER CODE ***** */
     if(event_cnt_name === 'led') {
         // send to tas
         thyme_tas.send_to_tas(event_cnt_name, content);

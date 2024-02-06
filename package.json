@@ -1,6 +1,6 @@
 {
     "name": "nCube-thyme-Nodejs",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "description": "oneM2M Client",
     "main": "thyme.js",
     "directories": {
